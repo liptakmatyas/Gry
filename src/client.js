@@ -7,22 +7,30 @@ $(document).ready(function() {
     });
 
     var teamsInGame = [
-        { color: '#800',    fighterMode: 'shield' },
-        { color: '#080',    fighterMode: 'shield' },
-        { color: '#008',    fighterMode: 'shield' }
+        { color: 'x00',    heroLevel: 1,   fighterMode: 'shield' },
+        { color: '0x0',    heroLevel: 2,   fighterMode: 'shield' },
+        { color: '00x',    heroLevel: 3,   fighterMode: 'shield' }
     ];
 
     var i, n = teamsInGame.length;
     var nFighters = 50;
     for (i = 0; i < n; ++i) {
         var team = teamsInGame[i];
+        var maxHP = team.heroLevel*100;
         var hero = G.AddHero({
+            symbol: String.fromCharCode(parseInt('25A3', 16)),
+            level: team.heroLevel,
+            HP: maxHP,
+            maxHP: maxHP,
             team: team.color,
             mapPos: G.RndPos(G.MapDim())
         });
         for (j = 0; j < nFighters; ++j) {
+            var maxHP = 50;
             var fighter = G.AddFighter({
                 team: team.color,
+                HP: maxHP,
+                maxHP: maxHP,
                 fighterMode: team.fighterMode,
                 mapPos: G.RndPos(G.MapDim())
             });

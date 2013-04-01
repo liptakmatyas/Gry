@@ -1,3 +1,20 @@
+/*
+ *  TODO    UI elements for all teams
+ *          -   hero HP display
+ *          -   flags: enable/disable
+ *          -   fighter count
+ *          -   fighterMode dropdown
+ *  TODO    more than one hero per team
+ *          -   fighters need to be attached to one hero
+ *          -   choose "image" (i.e. Unicode char)
+ *              -   http://www.fileformat.info/info/unicode/category/So/list.htm
+ *              -   U+25A2 ... U+25A9
+ *          -   flags should also display the hero's character
+ *  TODO    mouse handling
+ *          -   placing/moving/removing flags
+ *  TODO    multiple flags per hero
+ *          -   assign weights for flags
+ */
 (function() {
 
 //  Make sure we're alone
@@ -53,6 +70,7 @@ Gry = {
         var b2PolygonShape = Box2D.Collision.Shapes.b2PolygonShape;
         var b2DebugDraw = Box2D.Dynamics.b2DebugDraw;
         var b2MouseJointDef = Box2D.Dynamics.Joints.b2MouseJointDef;
+        var b2ContactListener = Box2D.Dynamics.b2ContactListener;
 
         //  Scale dimension d{w,h} to world dimensions
         var scaleDim2W = function(d) {
@@ -71,7 +89,7 @@ Gry = {
 
         //  Scale position p{x,y} to map coordinates
         var scalePos2M = function(p) {
-            return { x: p.x*worldScale, y: p.y*worldScale };
+            return { x: Math.floor(p.x*worldScale), y: Math.floor(p.y*worldScale) };
         };
 
         //  Create a default box
@@ -231,7 +249,7 @@ Gry = {
                     if (thisFighter.team === thatHero.team) {
                         var thisBody = thisFighter.body;
                         var ap = createActionPack(thisBody.GetPosition(), thatHero.body.GetPosition());
-                        var F = 8*(ap.R2-shieldRadius);
+                        var F = 8*(ap.R2-shieldRadius*thatHero.level);
                         applyAsymForce(thisBody, F, ap);
                     }
                 },
@@ -280,6 +298,7 @@ Gry = {
 
             for (i = 0; i < nHeroes; ++i) {
                 var heroA = heroes[i];
+                if (heroA === null) continue;
                 var bodyA = heroA.body;
 
                 //  Apply forces to flags
@@ -296,6 +315,7 @@ Gry = {
 
                 for (j = i+1; j < nHeroes; ++j) {
                     var heroB = heroes[j];
+                    if (heroB === null) continue;
                     var bodyB = heroB.body;
 
                     var ap = createActionPack(bodyA.GetPosition(), bodyB.GetPosition());
@@ -311,26 +331,31 @@ Gry = {
             //  Apply forces to fighters according to 'fighterMode'
             for (i = 0; i < nFighters; ++i) {
                 var thisFighter = fighters[i];
+                if (thisFighter === null) continue;
                 var fm = fighterModes[thisFighter.fighterMode];
 
                 for (j = 0; j < nHeroes; ++j) {
+                    var thatHero = heroes[j];
+                    if (thatHero === null) continue;
                     var forceFunc = fm.toHero;
                     if (typeof forceFunc === 'function') {
-                        forceFunc(thisFighter, heroes[j]);
+                        forceFunc(thisFighter, thatHero);
                     }
                 }
 
                 for (j = 0; j < nFighters; ++j) {
                     if (j === i) continue;
+                    var thatFighter = fighters[j];
+                    if (thatFighter === null) continue;
                     var forceFunc = fm.toFighter;
                     if (typeof forceFunc === 'function') {
-                        forceFunc(thisFighter, fighters[j]);
+                        forceFunc(thisFighter, thatFighter);
                     }
                 }
             }
         };
 
-        //  u{body} -> u{body,box,mapPos}
+        //  u{body} -> u{body,box{hW,hH,a},mapPos{x,y}}
         //
         //  NOTE:   Assumes having exactly one fixture: a rectangle.
         //          (Units are squares at the moment.)
@@ -342,14 +367,26 @@ Gry = {
             var dim = scaleDim2M({ w: vert[1].x-vert[0].x, h: vert[2].y-vert[1].y });
             var cPos = scalePos2M(body.GetPosition());
             u.box = {
-                x: cPos.x-dim.w/2,
-                y: cPos.y-dim.h/2,
-                w: dim.w,
-                h: dim.h
+                hW: dim.w/2,
+                hH: dim.h/2,
+                a: body.GetAngle()
             };
             u.mapPos = { x: cPos.x, y: cPos.y };
             //console.log('[updateUnit] UPDATED u:', u);
             return u;
+        };
+
+        var scaledTeamColor = function(team, scale) {
+            //console.log('[scaledTeamColor] team, scale:', team, scale);
+            var colorValue = Math.floor(255*scale);
+            colorValue = colorValue < 0 ? 0
+                       : colorValue > 255 ? 255
+                       : colorValue;
+            var hexColorValue = (colorValue < 16 ? '0' : '') + colorValue.toString(16);
+            //console.log('[scaledTeamColor] colorValue, hexColorValue:', colorValue, hexColorValue);
+            var c = '#'+team.replace(/0/g, '00').replace(/x/g, hexColorValue);
+            //console.log('[scaledTeamColor] c:', c);
+            return c;
         };
 
         var updateView = function() {
@@ -358,19 +395,36 @@ Gry = {
             var i;
 
             for (i = 0; i < nHeroes; ++i) {
-                updateUnit(heroes[i]);
+                var hero = heroes[i];
+                if (hero === null) continue;
+                if (hero.HP > 0) {
+                    updateUnit(hero);
+                } else {
+                    console.log('[updateView] hero DIED:', hero);
+                    world.DestroyBody(hero.body);
+                    heroes[i] = null;
+                }
             }
 
             for (i = 0; i < nFighters; ++i) {
-                updateUnit(fighters[i]);
+                var fighter = fighters[i];
+                if (fighter === null) continue;
+                if (fighter.HP > 0) {
+                    updateUnit(fighter);
+                } else {
+                    console.log('[updateView] fighter DIED:', fighter);
+                    world.DestroyBody(fighter.body);
+                    fighters[i] = null;
+                }
             }
 
             //  Draw flags
+            canvasCtx.lineWidth = 2;
             for (i = 0; i < nHeroes; ++i) {
                 var hero = heroes[i];
-                canvasCtx.fillStyle = hero.team;
-                canvasCtx.strokeStyle = hero.team;
-                canvasCtx.lineWidth = 2;
+                if (hero === null) continue;
+                canvasCtx.fillStyle = scaledTeamColor(hero.team, 1);
+                canvasCtx.strokeStyle = scaledTeamColor(hero.team, 1);
 
                 for (var flagName in hero.flags) {
                     var flagTarget = hero.flags[flagName];
@@ -382,20 +436,49 @@ Gry = {
                 }
             }
 
+            canvasCtx.lineWidth = 1;
+            canvasCtx.textAlign = 'center';
+            canvasCtx.textBaseline = 'middle';
+
             //  Draw visible heroes
             for (i = 0; i < nHeroes; ++i) {
                 var hero = heroes[i];
+                if (hero === null) continue;
                 var box = hero.box;
-                canvasCtx.fillStyle = hero.team;
-                canvasCtx.fillRect(box.x, box.y, box.w, box.h);
+                var mapPos = hero.mapPos;
+                var cx = mapPos.x;
+                var cy = mapPos.y;
+                var health = hero.HP/hero.maxHP;
+
+                canvasCtx.font = (2*box.hH)+'pt sans-serif';
+                canvasCtx.fillStyle = scaledTeamColor(hero.team, health);
+                canvasCtx.strokeStyle = scaledTeamColor(hero.team, 1);
+                canvasCtx.save();
+                canvasCtx.translate(cx, cy);
+                canvasCtx.rotate(box.a);
+                canvasCtx.fillText(hero.symbol, 0, -2*hero.level);
+                canvasCtx.strokeText(hero.symbol, 0, -2*hero.level);
+                canvasCtx.restore();
             }
 
             //  Draw visible fighters
             for (i = 0; i < nFighters; ++i) {
                 var fighter = fighters[i];
+                if (fighter === null) continue;
                 var box = fighter.box;
-                canvasCtx.fillStyle = fighter.team;
-                canvasCtx.fillRect(box.x, box.y, box.w, box.h);
+                var mapPos = fighter.mapPos;
+                var cx = mapPos.x;
+                var cy = mapPos.y;
+                var health = fighter.HP/fighter.maxHP;
+
+                canvasCtx.save();
+                canvasCtx.translate(cx, cy);
+                canvasCtx.rotate(box.a);
+                canvasCtx.fillStyle = scaledTeamColor(fighter.team, health);
+                canvasCtx.strokeStyle = scaledTeamColor(fighter.team, 1);
+                canvasCtx.fillRect(-box.hW, -box.hH, 2*box.hW, 2*box.hH);
+                canvasCtx.strokeRect(-box.hW, -box.hH, 2*box.hW, 2*box.hH);
+                canvasCtx.restore();
             }
         };
 
@@ -412,6 +495,32 @@ Gry = {
             updateView();
             world.ClearForces();
         };
+
+        var listener = new b2ContactListener;
+        listener.PostSolve = function(contact, impulse) {
+            var udA = contact.GetFixtureA().GetBody().GetUserData();
+            var udB = contact.GetFixtureB().GetBody().GetUserData();
+            //console.log('[ContactListener.PostSolve] udA, udB:', udA, udB);
+            if (typeof udA === 'object' && typeof udB === 'object') {
+                var unitA = udA.unitType === 'hero' ? heroes[udA.unitIdx]
+                          : udA.unitType === 'fighter' ? fighters[udA.unitIdx]
+                          : undefined;
+                var unitB = udB.unitType === 'hero' ? heroes[udB.unitIdx]
+                          : udB.unitType === 'fighter' ? fighters[udB.unitIdx]
+                          : undefined;
+                //console.log('[ContactListener.PostSolve] unitA, unitB:', unitA, unitB);
+                if (typeof unitA === 'object' && typeof unitB === 'object') {
+                    if (unitA.team !== unitB.team) {
+                        var hit = impulse.normalImpulses[0];
+                        //console.log('[ContactListener.PostSolve] hit:', hit);
+                        unitA.HP -= hit;
+                        unitB.HP -= hit;
+                        //console.log('[ContactListener.PostSolve] AFTER HIT / unitA, unitB:', unitA, unitB, hit);
+                    }
+                }
+            }
+        };
+        world.SetContactListener(listener);
 
         var G = {
 
@@ -434,6 +543,10 @@ Gry = {
             AddHero: function(stat) {
                 console.log('[AddHero] stat:', stat);
                 var H = {
+                    symbol: stat.symbol,
+                    level: stat.level,
+                    HP: stat.HP,
+                    maxHP: stat.maxHP,
                     body: null,
                     mapPos: {
                         x: stat.mapPos.x,
@@ -445,7 +558,9 @@ Gry = {
                         moveTo: G.RndPos(G.MapDim())
                     }
                 };
-                H.body = createBox(scalePos2W(H.mapPos), scaleDim2W({ w: 10, h: 10 }), b2Body.b2_dynamicBody, H);
+                var size = 10*H.level;
+                H.body = createBox(scalePos2W(H.mapPos), scaleDim2W({ w: size, h: size }), b2Body.b2_dynamicBody,
+                        { unitType: 'hero', unitIdx: heroes.length });
 
                 console.log('[AddHero] H:', H);
                 heroes.push(H);
@@ -455,6 +570,8 @@ Gry = {
             AddFighter: function(stat) {
                 console.log('[AddFighter] stat:', stat);
                 var F = {
+                    HP: stat.HP,
+                    maxHP: stat.maxHP,
                     body: null,
                     mapPos: {
                         x: stat.mapPos.x,
@@ -463,7 +580,8 @@ Gry = {
                     fighterMode: stat.fighterMode,
                     team: stat.team
                 };
-                F.body = createBox(scalePos2W(F.mapPos), scaleDim2W({ w: 3, h: 3 }), b2Body.b2_dynamicBody, F);
+                F.body = createBox(scalePos2W(F.mapPos), scaleDim2W({ w: 3, h: 3 }), b2Body.b2_dynamicBody,
+                        { unitType: 'fighter', unitIdx: fighters.length });
 
                 console.log('[AddFighter] F:', F);
                 fighters.push(F);
@@ -473,6 +591,7 @@ Gry = {
             StartLoop: function() {
                 console.log('[StartLoop]');
                 isTicking = true;
+
                 ticker = setInterval(function() { tick(); }, frameTime); // TODO RAF
                 //tick();
                 return this;
