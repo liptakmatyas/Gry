@@ -30,12 +30,13 @@ Gry = {
         var worldScale = conf.worldScale;
         var viewDimW = null;
 
-        var FPS = 10;
+        var FPS = 30;
         var frameTime = 1000/FPS;
         var isTicking = false;
         var ticker = null;
 
         var heroes = [];
+        var fighters = [];
 
         /*
          *  Helpers
@@ -88,6 +89,7 @@ Gry = {
 
             var b = world.CreateBody(bodyDef);
             b.CreateFixture(fixtDef);
+            b.SetLinearDamping(6);
             return b;
         };
 
@@ -124,7 +126,7 @@ Gry = {
         bodyDef = new b2BodyDef();
         fixtDef = new b2FixtureDef();
         fixtDef.density = 1;
-        fixtDef.friction = 0.9;
+        fixtDef.friction = 1;
         fixtDef.restitution = 0.00001;
 
         //  wall thickness = 30
@@ -140,14 +142,11 @@ Gry = {
             debugDraw = new b2DebugDraw();
             debugDraw.SetSprite(canvasCtx);
             debugDraw.SetDrawScale(worldScale);
-            debugDraw.SetFillAlpha(0.5);
+            debugDraw.SetFillAlpha(0.9);
             debugDraw.SetLineThickness(1.0);
             debugDraw.SetFlags(b2DebugDraw.e_shapeBit | b2DebugDraw.e_jointBit);
             world.SetDebugDraw(debugDraw);
         }
-
-        //  Physics constants
-        var H2HConst = -10;
 
         //  F: absolute force size, without direction; float
         //  dx,dy: X/Y components of force direction; floats
@@ -160,101 +159,255 @@ Gry = {
             return v;
         };
 
+        //  body: Box2D body
+        //  F: absolute force; float
+        //  ap{dx,dy,R2}: action pack
+        var applyAsymForce = function(body, F, ap) {
+            //console.log('[applyAsymForce] body, F, ap:', body, F, ap);
+            body.ApplyForce(FVec(F, ap.dx, ap.dy), body.GetWorldCenter());
+        };
+
         //  A, B: Box2D bodies
         //  F: absolute force; float
         //  ap{dx,dy,R2}: action pack
         var applySymForce = function(A, B, F, ap) {
-            console.log('[applySymForce] A, B, F, ap:', A, B, F, ap);
+            //console.log('[applySymForce] A, B, F, ap:', A, B, F, ap);
             var FA = FVec(F, ap.dx, ap.dy);
             var FB = FVec(-F, ap.dx, ap.dy);
-            console.log('[applySymForce] FA, FB:', FA, FB);
+            //console.log('[applySymForce] FA, FB:', FA, FB);
             A.ApplyForce(FA, A.GetWorldCenter());
             B.ApplyForce(FB, B.GetWorldCenter());
         };
 
-        //  A, B: Box2D bodies
+        //  pA{x,y}, pB{x,y}: positions of the Box2D bodies
         //  Returns: ap{dx,dy,R2} action pack
         //  - ap.dx, ay.dy: X/Y components of distance from A to B in world coordinates (signed!)
         //  - ap.R2: squared distance between A and B in world coordinates
-        var createActionPack = function(A, B) {
-            var pA = A.GetPosition();
-            var pB = B.GetPosition();
-            console.log('[createActionPack] pA.x, pA.y:', pA.x, pA.y);
-            console.log('[createActionPack] pB.x, pB.y:', pB.x, pB.y);
+        var createActionPack = function(pA, pB) {
+            //console.log('[createActionPack] pA, pB:', pA, pB);
             var dx = pB.x-pA.x;
             var dy = pB.y-pA.y;
             var R2 = dx*dx + dy*dy;
-            console.log('[createActionPack] dx, dy, R2:', dx, dy, R2);
+            //console.log('[createActionPack] dx, dy, R2:', dx, dy, R2);
             return { dx:dx, dy:dy, R2:R2 };
+        };
+
+        //  Forces between heroes and their flags.
+        //  All functions have the same parameters:
+        //  body: Box2D body of hero
+        //  ap{dx,dy,R2}: action pack
+        var flag = {
+            'avoid': {
+                force: function(body, ap) {
+                    return -3/ap.R2;
+                },
+                draw: function(pos) {
+                    canvasCtx.beginPath();
+                    canvasCtx.arc(pos.x, pos.y, 10, 0, 2*Math.PI, false);
+                    canvasCtx.stroke();
+                }
+            },
+            'moveTo': {
+                force: function(body, ap) {
+                    return 3*ap.R2;
+                },
+                draw: function(pos) {
+                    canvasCtx.beginPath();
+                    canvasCtx.arc(pos.x, pos.y, 10, 0, 2*Math.PI, false);
+                    canvasCtx.fill();
+                }
+            }
+        };
+
+        //  TODO    fighterMode should be set by player commands
+        //var fighterMode = 'fight';
+        var fighterMode = 'shield';
+        var shieldRadius = 1;
+        var fighterModes = {
+            'shield': {
+                toHero: function(thisFighter, thatHero) {
+                    //  Own hero: attracts with radius
+                    //  other heroes: neutral
+                    if (thisFighter.team === thatHero.team) {
+                        var thisBody = thisFighter.body;
+                        var ap = createActionPack(thisBody.GetPosition(), thatHero.body.GetPosition());
+                        var F = 8*(ap.R2-shieldRadius);
+                        applyAsymForce(thisBody, F, ap);
+                    }
+                },
+                toFighter: function(thisFighter, thatFighter) {
+                    //  Own team's fighters: neutral
+                    //  other fighters: attract
+                    if (thisFighter.team !== thatFighter.team) {
+                        var thisBody = thisFighter.body;
+                        var thatBody = thatFighter.body;
+                        var ap = createActionPack(thisBody.GetPosition(), thatBody.GetPosition());
+                        var F = 0.5/ap.R2;
+                        applyAsymForce(thisBody, F, ap);
+                    }
+                }
+            },
+
+            'fight': {
+                toHero: function(thisFighter, thatHero) {
+                    //  Own hero: neutral
+                    //  other heroes: attract
+                    if (thisFighter.team !== thatHero.team) {
+                        var thisBody = thisFighter.body;
+                        var ap = createActionPack(thisBody.GetPosition(), thatHero.body.GetPosition());
+                        var F = 4/ap.R2;
+                        applyAsymForce(thisBody, F, ap);
+                    }
+                },
+                toFighter: function(thisFighter, thatFighter) {
+                    //  Own team's fighters: neutral
+                    //  other fighters: attract
+                    if (thisFighter.team !== thatFighter.team) {
+                        var thisBody = thisFighter.body;
+                        var thatBody = thatFighter.body;
+                        var ap = createActionPack(thisBody.GetPosition(), thatBody.GetPosition());
+                        var F = 1/ap.R2;
+                        applyAsymForce(thisBody, F, ap);
+                    }
+                }
+            }
         };
 
         var applyForces = function() {
             var nHeroes = heroes.length;
+            var nFighters = fighters.length;
             var i, j;
 
-            for (i = 0; i < nHeroes-1; ++i) {
+            for (i = 0; i < nHeroes; ++i) {
                 var heroA = heroes[i];
                 var bodyA = heroA.body;
+
+                //  Apply forces to flags
+                for (var flagName in heroA.flags) {
+                    var flagTarget = heroA.flags[flagName];
+                    if (flagTarget !== null && typeof flag[flagName].force === 'function') {
+                        //  flagTarget{x,y} is stored in map coordinates, need world coordinates
+                        flagTarget = scalePos2W(flagTarget);
+                        var ap = createActionPack(bodyA.GetPosition(), flagTarget);
+                        var F = flag[flagName].force(bodyA, ap);
+                        applyAsymForce(bodyA, F, ap);
+                    }
+                }
 
                 for (j = i+1; j < nHeroes; ++j) {
                     var heroB = heroes[j];
                     var bodyB = heroB.body;
 
-                    var ap = createActionPack(bodyA, bodyB);
-                    console.log('[applyForces] ap:', ap);
+                    var ap = createActionPack(bodyA.GetPosition(), bodyB.GetPosition());
 
                     //  Hero--hero force: repel
-                    var H2HStrength = 20;   //  TODO    Make this depend on hero stats (~charge)
-                    var F = H2HConst*H2HStrength/ap.R2;
+                    //  TODO    Make this depend on hero stats (~charge)
+                    var F = -5/ap.R2;
 
                     applySymForce(bodyA, bodyB, F, ap);
                 }
             }
+
+            //  Apply forces to fighters according to 'fighterMode'
+            for (i = 0; i < nFighters; ++i) {
+                var thisFighter = fighters[i];
+                var fm = fighterModes[thisFighter.fighterMode];
+
+                for (j = 0; j < nHeroes; ++j) {
+                    var forceFunc = fm.toHero;
+                    if (typeof forceFunc === 'function') {
+                        forceFunc(thisFighter, heroes[j]);
+                    }
+                }
+
+                for (j = 0; j < nFighters; ++j) {
+                    if (j === i) continue;
+                    var forceFunc = fm.toFighter;
+                    if (typeof forceFunc === 'function') {
+                        forceFunc(thisFighter, fighters[j]);
+                    }
+                }
+            }
+        };
+
+        //  u{body} -> u{body,box,mapPos}
+        //
+        //  NOTE:   Assumes having exactly one fixture: a rectangle.
+        //          (Units are squares at the moment.)
+        var updateUnit = function(u) {
+            //console.log('[updateUnit] PREVIOUS u:', u);
+            var body = u.body;
+            var fixt = body.GetFixtureList();
+            var vert = fixt.GetShape().GetVertices();
+            var dim = scaleDim2M({ w: vert[1].x-vert[0].x, h: vert[2].y-vert[1].y });
+            var cPos = scalePos2M(body.GetPosition());
+            u.box = {
+                x: cPos.x-dim.w/2,
+                y: cPos.y-dim.h/2,
+                w: dim.w,
+                h: dim.h
+            };
+            u.mapPos = { x: cPos.x, y: cPos.y };
+            //console.log('[updateUnit] UPDATED u:', u);
+            return u;
         };
 
         var updateView = function() {
             var nHeroes = heroes.length;
+            var nFighters = fighters.length;
             var i;
 
-            //  Update all heroes
+            for (i = 0; i < nHeroes; ++i) {
+                updateUnit(heroes[i]);
+            }
+
+            for (i = 0; i < nFighters; ++i) {
+                updateUnit(fighters[i]);
+            }
+
+            //  Draw flags
             for (i = 0; i < nHeroes; ++i) {
                 var hero = heroes[i];
+                canvasCtx.fillStyle = hero.team;
+                canvasCtx.strokeStyle = hero.team;
+                canvasCtx.lineWidth = 2;
 
-                // We rely on having exactly one fixture: a rectangle (square)!
-                var body = hero.body;
-                var fixt = body.GetFixtureList();
-                var vert = fixt.GetShape().GetVertices();
-                var dim = scaleDim2M({ w: vert[1].x-vert[0].x, h: vert[2].y-vert[1].y });
-                var cPos = scalePos2M(body.GetPosition());
-                hero.box = {
-                    x: cPos.x-dim.w/2,
-                    y: cPos.y-dim.h/2,
-                    w: dim.w,
-                    h: dim.h
-                };
-                hero.mapPos = { x: cPos.x, y: cPos.y };
-                console.log('[updateView] UPDATE / i, hero:', i, hero);
+                for (var flagName in hero.flags) {
+                    var flagTarget = hero.flags[flagName];
+                    if (flagTarget !== null && typeof flag[flagName].draw === 'function') {
+                        //  flagTarget{x,y} is stored in map coordinates
+                        //console.log('[updateView] DRAW / flagName, flagTarget:', flagName, flagTarget);
+                        flag[flagName].draw(flagTarget);
+                    }
+                }
             }
 
             //  Draw visible heroes
             for (i = 0; i < nHeroes; ++i) {
                 var hero = heroes[i];
-                console.log('[updateView] DRAW / i, hero:', i, hero);
                 var box = hero.box;
                 canvasCtx.fillStyle = hero.team;
-                console.log('[updateView] DRAW / canvasCtx:', canvasCtx);
+                canvasCtx.fillRect(box.x, box.y, box.w, box.h);
+            }
+
+            //  Draw visible fighters
+            for (i = 0; i < nFighters; ++i) {
+                var fighter = fighters[i];
+                var box = fighter.box;
+                canvasCtx.fillStyle = fighter.team;
                 canvasCtx.fillRect(box.x, box.y, box.w, box.h);
             }
         };
 
         var tick = function() { 
-            console.log('[tick]', heroes);
+            //console.log('[tick]', heroes);
             applyForces();
             world.Step(1/FPS, 10, 10);
             if (!isDebugMode) {
                 canvasCtx.clearRect(0, 0, viewWidth, viewHeight);
             } else {
                 world.DrawDebugData();
+                canvasCtx.globalAlpha = 0.5;
             }
             updateView();
             world.ClearForces();
@@ -266,7 +419,7 @@ Gry = {
             //  d{w,h} -> p{x,y}
             RndPos: function(d) {
                 console.log('[RndPos] d:', d);
-                var p = { x: Math.random()*0.8*d.w, y: Math.random()*0.8*d.h };
+                var p = { x: (0.1+Math.random()*0.8)*d.w, y: (0.1+Math.random()*0.8)*d.h };
                 console.log('[RndPos] p:', p);
                 return p;
             },
@@ -287,9 +440,9 @@ Gry = {
                         y: stat.mapPos.y
                     },
                     team: stat.team,
-                    flag: {
-                        avoid: null,
-                        moveTo: null,
+                    flags: {
+                        avoid: G.RndPos(G.MapDim()),
+                        moveTo: G.RndPos(G.MapDim())
                     }
                 };
                 H.body = createBox(scalePos2W(H.mapPos), scaleDim2W({ w: 10, h: 10 }), b2Body.b2_dynamicBody, H);
@@ -299,10 +452,22 @@ Gry = {
                 console.log('[AddHero] Updated list of heroes:', heroes);
             },
 
-            ListHeroes: function() {
-                var n = heroes.length;
-                console.log('Heroes:');
-                for (var i = 0; i < n; ++i) { console.log(heroes[i]); }
+            AddFighter: function(stat) {
+                console.log('[AddFighter] stat:', stat);
+                var F = {
+                    body: null,
+                    mapPos: {
+                        x: stat.mapPos.x,
+                        y: stat.mapPos.y
+                    },
+                    fighterMode: stat.fighterMode,
+                    team: stat.team
+                };
+                F.body = createBox(scalePos2W(F.mapPos), scaleDim2W({ w: 3, h: 3 }), b2Body.b2_dynamicBody, F);
+
+                console.log('[AddFighter] F:', F);
+                fighters.push(F);
+                console.log('[AddFighter] Updated list of fighters:', fighters);
             },
 
             StartLoop: function() {
