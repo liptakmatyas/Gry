@@ -146,6 +146,72 @@ Gry = {
             world.SetDebugDraw(debugDraw);
         }
 
+        //  Physics constants
+        var H2HConst = -10;
+
+        //  F: absolute force size, without direction; float
+        //  dx,dy: X/Y components of force direction; floats
+        //  Returns v{x,y} with absolute size F, pointing to (dx;dy)
+        var FVec = function(F, dx, dy) {
+            var v = new b2Vec2(dx, dy);
+            v.Normalize();
+            v.x *= F;
+            v.y *= F;
+            return v;
+        };
+
+        //  A, B: Box2D bodies
+        //  F: absolute force; float
+        //  ap{dx,dy,R2}: action pack
+        var applySymForce = function(A, B, F, ap) {
+            console.log('[applySymForce] A, B, F, ap:', A, B, F, ap);
+            var FA = FVec(F, ap.dx, ap.dy);
+            var FB = FVec(-F, ap.dx, ap.dy);
+            console.log('[applySymForce] FA, FB:', FA, FB);
+            A.ApplyForce(FA, A.GetWorldCenter());
+            B.ApplyForce(FB, B.GetWorldCenter());
+        };
+
+        //  A, B: Box2D bodies
+        //  Returns: ap{dx,dy,R2} action pack
+        //  - ap.dx, ay.dy: X/Y components of distance from A to B in world coordinates (signed!)
+        //  - ap.R2: squared distance between A and B in world coordinates
+        var createActionPack = function(A, B) {
+            var pA = A.GetPosition();
+            var pB = B.GetPosition();
+            console.log('[createActionPack] pA.x, pA.y:', pA.x, pA.y);
+            console.log('[createActionPack] pB.x, pB.y:', pB.x, pB.y);
+            var dx = pB.x-pA.x;
+            var dy = pB.y-pA.y;
+            var R2 = dx*dx + dy*dy;
+            console.log('[createActionPack] dx, dy, R2:', dx, dy, R2);
+            return { dx:dx, dy:dy, R2:R2 };
+        };
+
+        var applyForces = function() {
+            var nHeroes = heroes.length;
+            var i, j;
+
+            for (i = 0; i < nHeroes-1; ++i) {
+                var heroA = heroes[i];
+                var bodyA = heroA.body;
+
+                for (j = i+1; j < nHeroes; ++j) {
+                    var heroB = heroes[j];
+                    var bodyB = heroB.body;
+
+                    var ap = createActionPack(bodyA, bodyB);
+                    console.log('[applyForces] ap:', ap);
+
+                    //  Hero--hero force: repel
+                    var H2HStrength = 20;   //  TODO    Make this depend on hero stats (~charge)
+                    var F = H2HConst*H2HStrength/ap.R2;
+
+                    applySymForce(bodyA, bodyB, F, ap);
+                }
+            }
+        };
+
         var updateView = function() {
             var nHeroes = heroes.length;
             var i;
@@ -166,28 +232,31 @@ Gry = {
                     w: dim.w,
                     h: dim.h
                 };
-                hero.mapPos = cPos;
+                hero.mapPos = { x: cPos.x, y: cPos.y };
+                console.log('[updateView] UPDATE / i, hero:', i, hero);
             }
 
             //  Draw visible heroes
             for (i = 0; i < nHeroes; ++i) {
                 var hero = heroes[i];
-                console.log('[updateView] i, hero:', i, hero);
+                console.log('[updateView] DRAW / i, hero:', i, hero);
                 var box = hero.box;
                 canvasCtx.fillStyle = hero.team;
-                console.log('[updateView] canvasCtx:', canvasCtx);
+                console.log('[updateView] DRAW / canvasCtx:', canvasCtx);
                 canvasCtx.fillRect(box.x, box.y, box.w, box.h);
             }
         };
 
         var tick = function() { 
             console.log('[tick]', heroes);
-            //this._applyForces();
+            applyForces();
             world.Step(1/FPS, 10, 10);
-            updateView();
-            if (isDebugMode) {
+            if (!isDebugMode) {
+                canvasCtx.clearRect(0, 0, viewWidth, viewHeight);
+            } else {
                 world.DrawDebugData();
             }
+            updateView();
             world.ClearForces();
         };
 
@@ -210,6 +279,7 @@ Gry = {
             },
 
             AddHero: function(stat) {
+                console.log('[AddHero] stat:', stat);
                 var H = {
                     body: null,
                     mapPos: {

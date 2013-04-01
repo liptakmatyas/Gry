@@ -3,7 +3,7 @@ $(document).ready(function() {
     var G = Gry.System({
         viewId: 'viewDiv',
         worldScale: 30,
-        isDebugMode: true
+        isDebugMode: false
     });
 
     var teamsInGame = [ 'red', 'blue' ];
