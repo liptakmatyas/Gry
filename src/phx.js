@@ -4,6 +4,8 @@
  *          -   flags: enable/disable
  *          -   fighter count
  *          -   fighterMode dropdown
+ *  TODO    remove null (i.e. dead) units from arrays
+ *          -   heroes[], fighters[]
  *  TODO    more than one hero per team
  *          -   fighters need to be attached to one hero
  *          -   choose "image" (i.e. Unicode char)
@@ -14,6 +16,11 @@
  *          -   placing/moving/removing flags
  *  TODO    multiple flags per hero
  *          -   assign weights for flags
+ *  TODO    make forces depend on unit stats
+ *          -   like mass for gravity
+ *          -   causes hit points to relate to stats!
+ *  TODO    use pre-rendering
+ *          -   flags, background
  */
 (function() {
 
@@ -291,6 +298,60 @@ Gry = {
             }
         };
 
+        //  TODO    Generalize forces
+        //  XXX     How does all this, below, fit with collision detection?
+        //
+        //  Current hack:
+        //  -   hero ---> flag: flag[flagName].force(b,ap)
+        //  -   hero <--> hero: hard-coded; (C,ap)
+        //  -   fighter ---> fighter: fighterModes[fighterMode].toFighter(fa,fb)
+        //  -   fighter ---> hero: fighterModes[fighterMode].toHero(fa,hb)
+        //
+        //  ---
+        //
+        //  User data for all entities:
+        //
+        //  var udWall = {
+        //      t: 'wall',
+        //      b: body                     //  Box2D body
+        //  };
+        //
+        //  var udUnit = {
+        //      t: "unitType",              //  hero, fighter
+        //      i: unitIdx                  //  unit index in units[udUnit.t][] (instead of heroes[] and fighters[])
+        //  };
+        //
+        //  ---
+        //
+        //  ?   Loop through bodies, check type (.t)
+        //  ?   hero ---> flag: flag[flagName].force(b,ap)
+        //
+        //  ---
+        //
+        //  -   hero <--> hero: hard-coded; (C,ap)
+        //  -   fighter ---> fighter: fighterModes[fighterMode].toFighter(fa,fb)
+        //  -   fighter ---> hero: fighterModes[fighterMode].toHero(fa,hb)
+        //
+        //      //  Assuming unit!
+        //      //  Load full unit objects
+        //      var thisUnit = units[thisUd.t][thisUd.i];
+        //      var thatUnit = units[thatUd.t][thatUd.i];
+        //
+        //      var thisBody = thisUnit.body;
+        //      var thatBody = thatUnit.body;
+        //      var actionPack = createActionPack(thisBody.GetPosition(), thatBody.GetPosition());
+        //
+        //      //  force[][]{Size,Apply} is a 2D array of pairs of functions that represent the force between two certain types of units (?)
+        //      //  force[][].Size(uA,uB,ap) returns the size of the force vector between two units (?) of certain types
+        //      //  force[][].Apply(bA,bB,F,ap) applies the force to zero, one, or both of the bodies
+        //      //  -   e.g.:
+        //      //      asymForce.Apply = function(bodyA, bodyB, F, ap) { applyAsymForce(bodyA, F, ap); };
+        //      //      symForce.Apply  = applySymForce(bodyA, bodyB, F, ap);
+        //      //  ?   How could this be used for shields, extra hit, remote weapons, etc?
+        //      var Force = force[thisUnit.type][thatUnit.type];
+        //      var F = Force.Size(thisUnit, thatUnit, actionPack);
+        //      Force.Apply(thisBody, thatBody, F, actionPack);
+
         var applyForces = function() {
             var nHeroes = heroes.length;
             var nFighters = fighters.length;
@@ -301,7 +362,6 @@ Gry = {
                 if (heroA === null) continue;
                 var bodyA = heroA.body;
 
-                //  Apply forces to flags
                 for (var flagName in heroA.flags) {
                     var flagTarget = heroA.flags[flagName];
                     if (flagTarget !== null && typeof flag[flagName].force === 'function') {
@@ -319,16 +379,11 @@ Gry = {
                     var bodyB = heroB.body;
 
                     var ap = createActionPack(bodyA.GetPosition(), bodyB.GetPosition());
-
-                    //  Hero--hero force: repel
-                    //  TODO    Make this depend on hero stats (~charge)
-                    var F = -5/ap.R2;
-
+                    var F = 100/ap.R2;
                     applySymForce(bodyA, bodyB, F, ap);
                 }
             }
 
-            //  Apply forces to fighters according to 'fighterMode'
             for (i = 0; i < nFighters; ++i) {
                 var thisFighter = fighters[i];
                 if (thisFighter === null) continue;
