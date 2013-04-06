@@ -1,0 +1,229 @@
+/*
+ *  RESET
+ */
+
+* {
+    padding: 0;
+    margin: 0;
+    border: 0px none;
+    border-collapse: collapse;
+    font-family: monospace;
+}
+
+/*
+ *  Widgets
+ */
+
+div.imgLabel {
+    position: relative;
+    width: 80px;
+    height: 16px;
+}
+
+div.imgLabel div.label {
+    position: absolute;
+    left: 16px;
+    bottom: 0;
+    width: 64px;
+    text-align: right;
+    font-size: 16px;
+}
+
+div.imgLabelLarge {
+    position: relative;
+    width: 160px;
+    height: 32px;
+}
+
+div.imgLabelLarge div.label {
+    position: absolute;
+    left: 32px;
+    width: 128px;
+    text-align: right;
+    font-size: 32px;
+}
+
+div.imgLabelHuge {
+    position: relative;
+    width: 100%;
+    height: 64px;
+}
+
+div.imgLabelHuge div.label {
+    position: absolute;
+    left: 64px;
+    top: 0;
+    width: 100%;
+    font-size: 64px;
+    font-weight: bold;
+}
+
+div.tab {
+    margin-bottom: 10px;
+}
+
+div.tabHeader {
+    position: relative;
+    height: 16px;
+}
+
+div.tabHeader div.label {
+    position: absolute;
+    left: 16px;
+    bottom: 0;
+    padding-left: 3px;
+    font-weight: bold;
+}
+
+div.action { height: 32px; }
+div.action div.shortcut {
+    display: inline-block;
+    position: relative;
+    top: 0;
+    height: 32px;
+    width: 32px;
+    font-size: 32px;
+    text-align: center;
+}
+
+div.action img {
+    position: absolute;
+    left: 32px;
+    height: 32px;
+}
+
+/*
+ *  Team colors
+ */
+
+.red-normal { background-color: #F88; color: #800; }
+.red-active { background-color: #F00; color: #800; }
+
+/*
+ *  Main screen
+ */
+
+#gameWin {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 1024px;
+    height: 610px;
+    background-color: #EEE;
+}
+
+#viewDiv {
+    display: inline-block;
+    position: absolute;
+    left: 5px;
+    top: 5px;
+    width: 640px;
+    height: 600px;
+}
+
+#controlPanel {
+    display: inline-block;
+    position: absolute;
+    left: 650px;
+    top: 5px;
+    width: 369px;
+    height: 600px;
+    background-color: #BBB;
+}
+
+#colonyHeader { margin-bottom: 10px; }
+
+#colonyHPBox div { display: inline-block; }
+#colonyHPBox div.label { width: 337px }
+
+#heroHPBox div { display: inline-block; }
+#heroHPBox div.label { width: 337px }
+
+.statRow { height: 16px; }
+.statRow div { display: inline-block; }
+
+#treasureBox { height: 32px; }
+#treasureBox div { display: inline-block; }
+#treasureBox div.mana { float: right; }
+
+#shopBox {
+    height: 128px;
+    overflow-y: scroll;
+}
+
+#shopBox div.item {
+    position: relative;
+    width: 350px;
+    height: 32px;
+    background-color: #FFF;
+}
+
+#shopBox div.amountBox {
+    display: inline-block;
+    position: absolute;
+    height: 32px;
+}
+
+#shopBox div.amountBox div.plusMinus {
+    display: inline-block;
+}
+
+#shopBox div.amountBox div.plusMinus button {
+    display: block;
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+    font-family: sans-serif;
+    font-weight: bold;
+}
+
+#shopBox div.amountBox div.plusMinus button.plus { top: 0; }
+#shopBox div.amountBox div.plusMinus button.minus { bottom: 0; }
+
+#shopBox div.amountBox div.amount {
+    display: inline-block;
+    position: absolute;
+    left: 16px;
+    bottom: 0;
+    width: 48px;
+    height: 32px;
+    font-size: 32px;
+    text-align: center;
+}
+
+#shopBox div.itemIcon img {
+    position: absolute;
+    left: 64px;
+    bottom: 0;
+    width: 32px;
+    height: 32px;
+}
+
+#shopBox div.itemName {
+    display: inline-block;
+    position: absolute;
+    left: 96px;
+    bottom: 0;
+    width: 120px;
+    height: 32px;
+    font-size: 10pt;
+}
+
+#shopBox div.costBox {
+    display: inline-block;
+    position: absolute;
+    left: 216px;
+    width: 80px;
+    height: 32px;
+    font-size: 10pt;
+}
+
+#shopBox div.costBox div.gold { top: 0; }
+#shopBox div.costBox div.mana { bottom: 0; }
+
+#shopBox button.buy {
+    float: right;
+    width: 32px;
+    height: 32px;
+}
+
