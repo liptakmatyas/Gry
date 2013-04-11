@@ -1,31 +1,29 @@
 Gry.Hero = (function($) {
 
     var H = function(GSys, stat) {
-        console.log('[Hero.New] stat:', stat);
-        var hero = {
-            symbol: stat.symbol,
-            level: stat.level,
+        //console.log('[Hero.New] stat:', stat);
+        var size = 10*stat.level;
+        var hero = Gry.Unit(GSys, {
+            unitType: 'hero',
+            unitIdx: stat.unitIdx,
+
+            team: stat.team,
             HP: stat.HP,
             maxHP: stat.maxHP,
-            body: null,
-            mapPos: {
-                x: stat.mapPos.x,
-                y: stat.mapPos.y
-            },
-            team: stat.team,
+            level: stat.level,
             flags: {
                 avoid: stat.flagPos.avoid,
                 moveTo: stat.flagPos.moveTo
-            }
-        };
+            },
 
-        var size = 10*hero.level;
-        hero.body = GSys.createBox(GSys.scalePos2W(hero.mapPos),
-                    GSys.scaleDim2W({ w: size, h: size }),
-                    b2Body.b2_dynamicBody,
-                    { unitType: 'hero', unitIdx: stat.unitIdx });
+            body: null,
+            symbol: stat.symbol,
+            mapPos: { x: stat.mapPos.x, y: stat.mapPos.y },
+            imgW: size,
+            imgH: size
+        });
 
-        console.log('[Hero.New] RETURNED hero:', hero);
+        //console.log('[Hero.New] RETURNED hero:', hero);
         return hero;
     };
 

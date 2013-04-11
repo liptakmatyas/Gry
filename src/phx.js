@@ -71,25 +71,12 @@ Gry.System = (function() {
                 stat.unitIdx = heroes.length;
                 var H = Gry.Hero(this, stat);
                 heroes.push(H);
+                console.log('[Gry.AddHero] Added hero:', H);
             },
 
             AddFighter: function(stat) {
-                //console.log('[AddFighter] stat:', stat);
-                var F = {
-                    HP: stat.HP,
-                    maxHP: stat.maxHP,
-                    body: null,
-                    mapPos: {
-                        x: stat.mapPos.x,
-                        y: stat.mapPos.y
-                    },
-                    fighterMode: stat.fighterMode,
-                    team: stat.team
-                };
-                F.body = G.createBox(G.scalePos2W(F.mapPos), G.scaleDim2W({ w: 3, h: 3 }), b2Body.b2_dynamicBody,
-                        { unitType: 'fighter', unitIdx: fighters.length });
-
-                console.log('[AddFighter] F:', F);
+                stat.unitIdx = fighters.length;
+                var F = Gry.Fighter(this, stat);
                 fighters.push(F);
             },
 
@@ -128,7 +115,7 @@ Gry.System = (function() {
             //  - with body type bType
             //  - with user data bData
             createBox: function(posW, hdimW, bType, bData) {
-                console.log('[createBox] posW, hdimW, bType, bData:', posW, hdimW, bType, bData);
+                //console.log('[createBox] posW, hdimW, bType, bData:', posW, hdimW, bType, bData);
                 bodyDef.type = bType;
                 bodyDef.userData = bData;
                 bodyDef.position.Set(posW.x, posW.y);
@@ -380,6 +367,8 @@ Gry.System = (function() {
             var nHeroes = heroes.length;
             var nFighters = fighters.length;
             var i, j;
+            //console.log('[applyForces] nHeroes, heroes:', nHeroes, heroes);
+            //console.log('[applyForces] nFighters, fighters:', nFighters, fighters);
 
             for (i = 0; i < nHeroes; ++i) {
                 var heroA = heroes[i];
@@ -480,7 +469,7 @@ Gry.System = (function() {
                 if (hero.HP > 0) {
                     updateUnit(hero);
                 } else {
-                    console.log('[updateView] hero DIED:', hero);
+                    console.log('[updateView] DIED index, hero:', i, hero);
                     if (i === 0) { updatePanels(); }
                     world.DestroyBody(hero.body);
                     heroes[i] = null;
@@ -493,7 +482,7 @@ Gry.System = (function() {
                 if (fighter.HP > 0) {
                     updateUnit(fighter);
                 } else {
-                    console.log('[updateView] fighter DIED:', fighter);
+                    //console.log('[updateView] DIED index, fighter:', i, fighter);
                     world.DestroyBody(fighter.body);
                     fighters[i] = null;
                 }

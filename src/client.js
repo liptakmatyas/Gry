@@ -7,9 +7,9 @@ $(document).ready(function() {
     });
 
     var teamsInGame = [
-        { color: 'x00',    heroLevel: 1,   fighterMode: 'shield' },
-        { color: '0x0',    heroLevel: 1,   fighterMode: 'fight' },
-        { color: '00x',    heroLevel: 1,   fighterMode: 'fight' }
+        { color: 'x00',    heroLevel: 1,   fighterMode: 'fight' }
+    ,   { color: '0x0',    heroLevel: 1,   fighterMode: 'fight' }
+    ,   { color: '00x',    heroLevel: 1,   fighterMode: 'fight' }
     ];
 
     var i, n = teamsInGame.length;
