@@ -22,18 +22,15 @@
  *  TODO    use pre-rendering
  *          -   flags, background
  */
-(function() {
 
-//  Make sure we're alone
-if (typeof Gry !== 'undefined') {
-    throw 'Global variable Gry already defined'
-}
+//  TODO    Change to Gry.Phx
+Gry.System = (function() {
 
-//  Create our single global entry point
-Gry = {
-
-    System: function(conf) {
+    var S = function(conf) {
         console.log('[System] conf:', conf);
+
+        Gry.worldScale = conf.worldScale;
+
         var isDebugMode = conf.isDebugMode;
         var debugDraw = null;
 
@@ -51,7 +48,6 @@ Gry = {
         var world = null;
         var bodyDef = null;
         var fixtDef = null;
-        var worldScale = conf.worldScale;
         var viewDimW = null;
 
         var FPS = 30;
@@ -62,62 +58,90 @@ Gry = {
         var heroes = [];
         var fighters = [];
 
-        /*
-         *  Helpers
-         */
+        var G = {
 
-        //  Box2D aliases
-        var b2Vec2 = Box2D.Common.Math.b2Vec2;
-        var b2AABB = Box2D.Collision.b2AABB;
-        var b2BodyDef = Box2D.Dynamics.b2BodyDef;
-        var b2Body = Box2D.Dynamics.b2Body;
-        var b2FixtureDef = Box2D.Dynamics.b2FixtureDef;
-        var b2Fixture = Box2D.Dynamics.b2Fixture;
-        var b2World = Box2D.Dynamics.b2World;
-        var b2PolygonShape = Box2D.Collision.Shapes.b2PolygonShape;
-        var b2DebugDraw = Box2D.Dynamics.b2DebugDraw;
-        var b2MouseJointDef = Box2D.Dynamics.Joints.b2MouseJointDef;
-        var b2ContactListener = Box2D.Dynamics.b2ContactListener;
+            //  Map dimensions
+            //  () -> d{w,h}
+            MapDim: function() {
+                //  TODO    The map should be bigger than the view
+                return { w: viewWidth, h: viewHeight };
+            },
 
-        //  Scale dimension d{w,h} to world dimensions
-        var scaleDim2W = function(d) {
-            return { w: d.w/worldScale, h: d.h/worldScale };
+            AddHero: function(stat) {
+                stat.unitIdx = heroes.length;
+                var H = Gry.Hero(this, stat);
+                heroes.push(H);
+            },
+
+            AddFighter: function(stat) {
+                //console.log('[AddFighter] stat:', stat);
+                var F = {
+                    HP: stat.HP,
+                    maxHP: stat.maxHP,
+                    body: null,
+                    mapPos: {
+                        x: stat.mapPos.x,
+                        y: stat.mapPos.y
+                    },
+                    fighterMode: stat.fighterMode,
+                    team: stat.team
+                };
+                F.body = G.createBox(G.scalePos2W(F.mapPos), G.scaleDim2W({ w: 3, h: 3 }), b2Body.b2_dynamicBody,
+                        { unitType: 'fighter', unitIdx: fighters.length });
+
+                console.log('[AddFighter] F:', F);
+                fighters.push(F);
+            },
+
+            StartLoop: function() {
+                console.log('[StartLoop]');
+                isTicking = true;
+
+                ticker = setInterval(function() { tick(); }, frameTime); // TODO RAF
+                //tick();
+                return this;
+            },
+
+            //  Scale dimension d{w,h} to world dimensions
+            scaleDim2W: function(d) {
+                return { w: d.w/Gry.worldScale, h: d.h/Gry.worldScale };
+            },
+
+            //  Scale dimension d{w,h} to map dimensions
+            scaleDim2M: function(d) {
+                return { w: d.w*Gry.worldScale, h: d.h*Gry.worldScale };
+            },
+
+            //  Scale position p{x,y} to world coordinates
+            scalePos2W: function(p) {
+                return { x: p.x/Gry.worldScale, y: p.y/Gry.worldScale };
+            },
+
+            //  Scale position p{x,y} to map coordinates
+            scalePos2M: function(p) {
+                return { x: Math.floor(p.x*Gry.worldScale), y: Math.floor(p.y*Gry.worldScale) };
+            },
+
+            //  Create a default box
+            //  - at world position posW{x,y}
+            //  - with half world scale size hdimW{w,h}
+            //  - with body type bType
+            //  - with user data bData
+            createBox: function(posW, hdimW, bType, bData) {
+                console.log('[createBox] posW, hdimW, bType, bData:', posW, hdimW, bType, bData);
+                bodyDef.type = bType;
+                bodyDef.userData = bData;
+                bodyDef.position.Set(posW.x, posW.y);
+                fixtDef.shape = new b2PolygonShape();
+                fixtDef.shape.SetAsBox(hdimW.w, hdimW.h);
+
+                var b =  world.CreateBody(bodyDef);
+                b.CreateFixture(fixtDef);
+                b.SetLinearDamping(6);
+                return b;
+            },
+
         };
-
-        //  Scale dimension d{w,h} to map dimensions
-        var scaleDim2M = function(d) {
-            return { w: d.w*worldScale, h: d.h*worldScale };
-        };
-
-        //  Scale position p{x,y} to world coordinates
-        var scalePos2W = function(p) {
-            return { x: p.x/worldScale, y: p.y/worldScale };
-        };
-
-        //  Scale position p{x,y} to map coordinates
-        var scalePos2M = function(p) {
-            return { x: Math.floor(p.x*worldScale), y: Math.floor(p.y*worldScale) };
-        };
-
-        //  Create a default box
-        //  - at world position posW{x,y}
-        //  - with half world scale size hdimW{w,h}
-        //  - with body type bType
-        //  - with user data bData
-        var createBox = function(posW, hdimW, bType, bData) {
-            console.log('[createBox] posW, hdimW, bType, bData:', posW, hdimW, bType, bData);
-            bodyDef.type = bType;
-            bodyDef.userData = bData;
-            bodyDef.position.Set(posW.x, posW.y);
-            fixtDef.shape = new b2PolygonShape();
-            fixtDef.shape.SetAsBox(hdimW.w, hdimW.h);
-
-            var b = world.CreateBody(bodyDef);
-            b.CreateFixture(fixtDef);
-            b.SetLinearDamping(6);
-            return b;
-        };
-
         /*
          *  Setup DOM
          */
@@ -155,13 +179,13 @@ Gry = {
         fixtDef.restitution = 0.00001;
 
         //  wall thickness = 30
-        viewDimW = scaleDim2W({ w: viewWidth, h: viewHeight });
-        var horizWallHdim = scaleDim2W({ w: viewWidth/2, h: 15 });
-        var vertWallHdim = scaleDim2W({ w: 15, h: viewHeight/2 });
-        createBox(scalePos2W({ x:viewWidthHalf, y:viewHeight }), horizWallHdim, b2Body.b2_staticBody);
-        createBox(scalePos2W({ x:viewWidthHalf, y:0 }), horizWallHdim, b2Body.b2_staticBody);
-        createBox(scalePos2W({ x:0, y:viewHeightHalf }), vertWallHdim, b2Body.b2_staticBody);
-        createBox(scalePos2W({ x:viewWidth, y:viewHeightHalf }), vertWallHdim, b2Body.b2_staticBody);
+        viewDimW = G.scaleDim2W({ w: viewWidth, h: viewHeight });
+        var horizWallHdim = G.scaleDim2W({ w: viewWidth/2, h: 15 });
+        var vertWallHdim = G.scaleDim2W({ w: 15, h: viewHeight/2 });
+        G.createBox(G.scalePos2W({ x:viewWidthHalf, y:viewHeight }), horizWallHdim, b2Body.b2_staticBody);
+        G.createBox(G.scalePos2W({ x:viewWidthHalf, y:0 }), horizWallHdim, b2Body.b2_staticBody);
+        G.createBox(G.scalePos2W({ x:0, y:viewHeightHalf }), vertWallHdim, b2Body.b2_staticBody);
+        G.createBox(G.scalePos2W({ x:viewWidth, y:viewHeightHalf }), vertWallHdim, b2Body.b2_staticBody);
 
         if (isDebugMode) {
             debugDraw = new b2DebugDraw();
@@ -234,7 +258,7 @@ Gry = {
             },
             'moveTo': {
                 force: function(body, ap) {
-                    return 3*ap.R2;
+                    return 1*ap.R2;
                 },
                 draw: function(pos) {
                     canvasCtx.beginPath();
@@ -244,9 +268,6 @@ Gry = {
             }
         };
 
-        //  TODO    fighterMode should be set by player commands
-        //var fighterMode = 'fight';
-        var fighterMode = 'shield';
         var shieldRadius = 1;
         var fighterModes = {
             'shield': {
@@ -306,51 +327,54 @@ Gry = {
         //  -   hero <--> hero: hard-coded; (C,ap)
         //  -   fighter ---> fighter: fighterModes[fighterMode].toFighter(fa,fb)
         //  -   fighter ---> hero: fighterModes[fighterMode].toHero(fa,hb)
-        //
-        //  ---
-        //
+
+        //  XXX hero-specific forces?
+        //  -   hero.flags[flagId][unitType][fidx]()
+        //  -   hero.units[unitType][fidx]()
+        //  -   hero.hero[heroName][fidx]()
+        //  XXX global forces
+        //  XXX team specific forces
+        //  XXX unit type specific forces (e.g. flags, fighterMode)
+
         //  User data for all entities:
         //
         //  var udWall = {
-        //      t: 'wall',
-        //      b: body                     //  Box2D body
+        //      t: 'wall'                   //  fixed; XXX wall types ???
+        //  };
+        //
+        //  var udHero = {
+        //      t: 'hero',                  //  fixed
+        //      n: "heroName",              //  user-defined, but *UNIQUE*, and not a "system type" (wall, fighter, ...)
+        //      i: unitIdx                  //  unit index in units[udUnit.t][i] (instead of fighters[])
         //  };
         //
         //  var udUnit = {
-        //      t: "unitType",              //  hero, fighter
-        //      i: unitIdx                  //  unit index in units[udUnit.t][] (instead of heroes[] and fighters[])
+        //      t: "unitType",              //  fighter
+        //      i: unitIdx                  //  unit index in units[udUnit.t][i] (instead of fighters[])
         //  };
-        //
-        //  ---
-        //
+
         //  ?   Loop through bodies, check type (.t)
         //  ?   hero ---> flag: flag[flagName].force(b,ap)
-        //
-        //  ---
-        //
         //  -   hero <--> hero: hard-coded; (C,ap)
         //  -   fighter ---> fighter: fighterModes[fighterMode].toFighter(fa,fb)
         //  -   fighter ---> hero: fighterModes[fighterMode].toHero(fa,hb)
-        //
-        //      //  Assuming unit!
-        //      //  Load full unit objects
+
+        //  Assuming unit!
+        //  Load full unit objects
         //      var thisUnit = units[thisUd.t][thisUd.i];
         //      var thatUnit = units[thatUd.t][thatUd.i];
+
+        //  forcePack{bA,bB,pA,pB,dx,dy,R2}
+        //      var forcePack = createForcePack(thisUnit, thatUnit); // TODO Formerly known as createActionPack()
+
+        //  force[][][fidx](uA,uB,ap) is a 3D array of force functions
+        //  -   A force function should calculate the size of the force vector, and apply it (sym/asym)
+        //  -   fcidx is the force chain index => order of application of forces
+        //  ?   How could this be used for shields, extra hit, remote weapons, etc?
         //
-        //      var thisBody = thisUnit.body;
-        //      var thatBody = thatUnit.body;
-        //      var actionPack = createActionPack(thisBody.GetPosition(), thatBody.GetPosition());
-        //
-        //      //  force[][]{Size,Apply} is a 2D array of pairs of functions that represent the force between two certain types of units (?)
-        //      //  force[][].Size(uA,uB,ap) returns the size of the force vector between two units (?) of certain types
-        //      //  force[][].Apply(bA,bB,F,ap) applies the force to zero, one, or both of the bodies
-        //      //  -   e.g.:
-        //      //      asymForce.Apply = function(bodyA, bodyB, F, ap) { applyAsymForce(bodyA, F, ap); };
-        //      //      symForce.Apply  = applySymForce(bodyA, bodyB, F, ap);
-        //      //  ?   How could this be used for shields, extra hit, remote weapons, etc?
-        //      var Force = force[thisUnit.type][thatUnit.type];
-        //      var F = Force.Size(thisUnit, thatUnit, actionPack);
-        //      Force.Apply(thisBody, thatBody, F, actionPack);
+        //      var ForceChain = force[thisUnit.type][thatUnit.type];
+        //      var ForceFunc = ForceChain[fidx]; // for each fidx in ForceChain
+        //      var F = ForceFunc(thisUnit, thatUnit, forcePack);
 
         var applyForces = function() {
             var nHeroes = heroes.length;
@@ -366,7 +390,7 @@ Gry = {
                     var flagTarget = heroA.flags[flagName];
                     if (flagTarget !== null && typeof flag[flagName].force === 'function') {
                         //  flagTarget{x,y} is stored in map coordinates, need world coordinates
-                        flagTarget = scalePos2W(flagTarget);
+                        flagTarget = G.scalePos2W(flagTarget);
                         var ap = createActionPack(bodyA.GetPosition(), flagTarget);
                         var F = flag[flagName].force(bodyA, ap);
                         applyAsymForce(bodyA, F, ap);
@@ -379,7 +403,8 @@ Gry = {
                     var bodyB = heroB.body;
 
                     var ap = createActionPack(bodyA.GetPosition(), bodyB.GetPosition());
-                    var F = 100/ap.R2;
+                    //var F = 100/ap.R2;
+                    var F = -2/ap.R2;
                     applySymForce(bodyA, bodyB, F, ap);
                 }
             }
@@ -419,8 +444,8 @@ Gry = {
             var body = u.body;
             var fixt = body.GetFixtureList();
             var vert = fixt.GetShape().GetVertices();
-            var dim = scaleDim2M({ w: vert[1].x-vert[0].x, h: vert[2].y-vert[1].y });
-            var cPos = scalePos2M(body.GetPosition());
+            var dim = G.scaleDim2M({ w: vert[1].x-vert[0].x, h: vert[2].y-vert[1].y });
+            var cPos = G.scalePos2M(body.GetPosition());
             u.box = {
                 hW: dim.w/2,
                 hH: dim.h/2,
@@ -456,6 +481,7 @@ Gry = {
                     updateUnit(hero);
                 } else {
                     console.log('[updateView] hero DIED:', hero);
+                    if (i === 0) { updatePanels(); }
                     world.DestroyBody(hero.body);
                     heroes[i] = null;
                 }
@@ -537,6 +563,18 @@ Gry = {
             }
         };
 
+        var updatePanels = function() {
+            var plrHeroIdx = 0;
+            var plrHero = heroes[plrHeroIdx];
+            var $heroHP = $('#heroHP');
+            if (plrHero !== null) {
+                $heroHP.text(Math.ceil(plrHero.HP)+'/'+plrHero.maxHP);
+            }
+            else {
+                $heroHP.text('R.I.P.');
+            }
+        };
+
         var tick = function() { 
             //console.log('[tick]', heroes);
             applyForces();
@@ -548,6 +586,7 @@ Gry = {
                 canvasCtx.globalAlpha = 0.5;
             }
             updateView();
+            updatePanels();
             world.ClearForces();
         };
 
@@ -577,87 +616,11 @@ Gry = {
         };
         world.SetContactListener(listener);
 
-        var G = {
-
-            //  Random position within 80% of given dimensions
-            //  d{w,h} -> p{x,y}
-            RndPos: function(d) {
-                console.log('[RndPos] d:', d);
-                var p = { x: (0.1+Math.random()*0.8)*d.w, y: (0.1+Math.random()*0.8)*d.h };
-                console.log('[RndPos] p:', p);
-                return p;
-            },
-
-            //  Map dimensions
-            //  () -> d{w,h}
-            MapDim: function() {
-                //  TODO    The map should be bigger than the view
-                return { w: viewWidth, h: viewHeight };
-            },
-
-            AddHero: function(stat) {
-                console.log('[AddHero] stat:', stat);
-                var H = {
-                    symbol: stat.symbol,
-                    level: stat.level,
-                    HP: stat.HP,
-                    maxHP: stat.maxHP,
-                    body: null,
-                    mapPos: {
-                        x: stat.mapPos.x,
-                        y: stat.mapPos.y
-                    },
-                    team: stat.team,
-                    flags: {
-                        avoid: G.RndPos(G.MapDim()),
-                        moveTo: G.RndPos(G.MapDim())
-                    }
-                };
-                var size = 10*H.level;
-                H.body = createBox(scalePos2W(H.mapPos), scaleDim2W({ w: size, h: size }), b2Body.b2_dynamicBody,
-                        { unitType: 'hero', unitIdx: heroes.length });
-
-                console.log('[AddHero] H:', H);
-                heroes.push(H);
-                console.log('[AddHero] Updated list of heroes:', heroes);
-            },
-
-            AddFighter: function(stat) {
-                console.log('[AddFighter] stat:', stat);
-                var F = {
-                    HP: stat.HP,
-                    maxHP: stat.maxHP,
-                    body: null,
-                    mapPos: {
-                        x: stat.mapPos.x,
-                        y: stat.mapPos.y
-                    },
-                    fighterMode: stat.fighterMode,
-                    team: stat.team
-                };
-                F.body = createBox(scalePos2W(F.mapPos), scaleDim2W({ w: 3, h: 3 }), b2Body.b2_dynamicBody,
-                        { unitType: 'fighter', unitIdx: fighters.length });
-
-                console.log('[AddFighter] F:', F);
-                fighters.push(F);
-                console.log('[AddFighter] Updated list of fighters:', fighters);
-            },
-
-            StartLoop: function() {
-                console.log('[StartLoop]');
-                isTicking = true;
-
-                ticker = setInterval(function() { tick(); }, frameTime); // TODO RAF
-                //tick();
-                return this;
-            }
-
-        };
 
         //console.log('[System] return G:', G);
         return G;
-    },
+    };
 
-};
+    return S;
 
 })();

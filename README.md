@@ -1,11 +1,13 @@
-# Gry, the RPS
+#   Gry, the RPS
 
-## Quick start
+##  Quick start
 
-0. ./test-server.sh
-0. Visit localhost:9999 in browser
+0.  ./test-server.sh
+0.  Visit localhost:9999 in browser
 
-## Credits
+##  Credits
 
-- [box2dweb](https://code.google.com/p/box2dweb/)
+-   [box2dweb](https://code.google.com/p/box2dweb/)
+-   Icons from [game-icons.net](http://game-icons.net/)
+    -   TODO: links to individual icons with proper attribution
 

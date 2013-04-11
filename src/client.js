@@ -8,8 +8,8 @@ $(document).ready(function() {
 
     var teamsInGame = [
         { color: 'x00',    heroLevel: 1,   fighterMode: 'shield' },
-        { color: '0x0',    heroLevel: 2,   fighterMode: 'shield' },
-        { color: '00x',    heroLevel: 3,   fighterMode: 'shield' }
+        { color: '0x0',    heroLevel: 1,   fighterMode: 'fight' },
+        { color: '00x',    heroLevel: 1,   fighterMode: 'fight' }
     ];
 
     var i, n = teamsInGame.length;
@@ -23,7 +23,11 @@ $(document).ready(function() {
             HP: maxHP,
             maxHP: maxHP,
             team: team.color,
-            mapPos: G.RndPos(G.MapDim())
+            mapPos: Gry.rndPos(G.MapDim()),
+            flagPos: {
+                avoid: Gry.rndPos(G.MapDim()),
+                moveTo: Gry.rndPos(G.MapDim())
+            }
         });
         for (j = 0; j < nFighters; ++j) {
             var maxHP = 50;
@@ -32,7 +36,7 @@ $(document).ready(function() {
                 HP: maxHP,
                 maxHP: maxHP,
                 fighterMode: team.fighterMode,
-                mapPos: G.RndPos(G.MapDim())
+                mapPos: Gry.rndPos(G.MapDim())
             });
         }
     }

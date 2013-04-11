@@ -7,166 +7,19 @@
     <body id="body">
         <div id="gameWin">
             <div id="viewDiv"></div>
-            <div id="controlPanel">
-                <div id="colonyHeader" class="imgLabelHuge red-normal">
-                    <img src="img/colony.64x64.png" alt="colony"/>
-                    <div class="label">Red</div>
-                </div>
-
-                <div id="statsTab" class="tab">
-                    <div class="tabHeader red-normal">
-                        <img src="img/colony.16x16.png" alt="colony"/>
-                        <div class="label">COLONY</div>
-                    </div>
-
-                    <div id="colonyHPBox" class="imgLabelLarge">
-                        <img src="img/hp.32x32.png"/>
-                        <div id="colonyHP" class="label">12345678/99999999</div>
-                    </div>
-
-                    <div id="treasureBox">
-                        <div class="gold imgLabelLarge">
-                            <img src="img/gold.32x32.png" alt="gold"/>
-                            <div id="totalGold" class="label">1234</div>
-                        </div>
-                        <div class="mana imgLabelLarge">
-                            <img src="img/mana.32x32.png" alt="mana"/>
-                            <div id="totalMana" class="label">5678</div>
-                        </div>
-                    </div>
-
-                </div>
-
-                <div id="heroTab" class="tab">
-                    <div class="tabHeader red-active">
-                        <img src="img/hero.16x16.png" alt="hero"/>
-                        <div class="label">HERO</div>
-                    </div>
-
-                    <div id="heroHPBox" class="imgLabelLarge">
-                        <img src="img/hp.32x32.png"/>
-                        <div id="heroHP" class="label">123456/999999</div>
-                    </div>
-
-                    <div class="statRow">
-                        <div id="heroLevelBox" class="imgLabel">
-                            <img src="img/level.16x16.png"/>
-                            <div id="heroLevel" class="label">123</div>
-                        </div>
-
-                        <div id="heroDamageBox" class="imgLabel">
-                            <img src="img/damage.16x16.png"/>
-                            <div id="heroDamage" class="label">123.45</div>
-                        </div>
-
-                        <div id="heroShieldBox" class="imgLabel">
-                            <img src="img/shield.16x16.png"/>
-                            <div id="heroShield" class="label">123.45</div>
-                        </div>
-                    </div>
-
-                    <div id="heroFlags">
-                        <div id="avoidFlag" class="action">
-                            <div class="shortcut">1</div>
-                            <img src="img/avoid.32x32.png"/>
-                        </div>
-                        <div id="moveToFlag" class="action">
-                            <div class="shortcut">2</div>
-                            <img src="img/moveto.32x32.png"/>
-                        </div>
-                        <div id="attackFlag" class="action">
-                            <div class="shortcut">3</div>
-                            <img src="img/attack.32x32.png"/>
-                        </div>
-                    </div>
-
-                </div>
-
-                <div id="swarmTab" class="tab">
-                    <div class="tabHeader red-active">
-                        <img src="img/swarm.16x16.png"/>
-                        <div class="label">SWARMS</div>
-                    </div>
-
-                    <div id="swarmList">
-                        <div id="fighterSwarm" class="action">
-                            <div class="shortcut">F</div>
-                            <img src="img/fighter.32x32.png"/>
-                        </div>
-                        <div id="goliathSwarm" class="action">
-                            <div class="shortcut">G</div>
-                            <img src="img/goliath.32x32.png"/>
-                        </div>
-                    </div>
-
-                </div>
-
-                <div id="arsenalTab" class="tab">
-                    <div class="tabHeader red-active">
-                        <img src="img/arsenal.16x16.png"/>
-                        <div class="label">ARSENAL</div>
-                    </div>
-
-                    <div id="weaponList">
-                        <div class="action">
-                            <div class="shortcut">R</div>
-                            <img src="img/rocket.32x32.png"/>
-                        </div>
-                        <div class="action">
-                            <div class="shortcut">C</div>
-                            <img src="img/orbiter-canon.32x32.png"/>
-                        </div>
-                    </div>
-
-                </div>
-
-                <div id="shopTab" class="tab">
-                    <div class="tabHeader red-normal">
-                        <img src="img/shop.16x16.png" alt="shop"/>
-                        <div class="label">SHOP</div>
-                    </div>
-
-                    <div id="shopBox">
-
-                        <div class="item">
-                            <div class="amountBox">
-                                <div class="plusMinus">
-                                    <button class="plus">+</button>
-                                    <button class="minus">-</button>
-                                </div>
-                                <div class="amount">99</div>
-                            </div>
-                            <div class="itemIcon">
-                               <img src="img/helm.32x32.png" alt="helm"/>
-                           </div>
-                            <div class="itemName">Item name with a-long-word</div>
-                            <div class="costBox">
-                                <div class="gold imgLabel">
-                                    <img src="img/gold.16x16.png" alt="gold"/>
-                                    <div class="label">1234</div>
-                                </div>
-                                <div class="mana imgLabel">
-                                    <img src="img/mana.16x16.png" alt="mana"/>
-                                    <div class="label">5678</div>
-                                </div>
-                            </div>
-                            <button class="buy">
-                                <img src="img/buy.32x32.png" alt="BUY"/>
-                            </button>
-                        </div>
-
-                    </div>
-
-                </div>
-            </div>
+            <div id="controlPanel"></div>
         </div>
 
-        <!--
         <script src="lib/jquery-1.9.1.min.js"></script>
         <script src="lib/Box2dWeb-2.1.a.3.min.js"></script>
 
+        <script src="src/Gry.js"></script>
         <script src="src/phx.js"></script>
+        <script src="src/Hero.js"></script>
+        <script src="src/Frag.js"></script>
+        <script src="src/main.js"></script>
         <script src="src/client.js"></script>
+        <!--
         -->
     </body>
 </html>

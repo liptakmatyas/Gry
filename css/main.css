@@ -7,59 +7,15 @@
     margin: 0;
     border: 0px none;
     border-collapse: collapse;
-    font-family: monospace;
+    font-family: "Lucida Console", Monaco, monospace;
 }
 
 /*
  *  Widgets
  */
 
-div.imgLabel {
-    position: relative;
-    width: 80px;
-    height: 16px;
-}
-
-div.imgLabel div.label {
-    position: absolute;
-    left: 16px;
-    bottom: 0;
-    width: 64px;
-    text-align: right;
-    font-size: 16px;
-}
-
-div.imgLabelLarge {
-    position: relative;
-    width: 160px;
-    height: 32px;
-}
-
-div.imgLabelLarge div.label {
-    position: absolute;
-    left: 32px;
-    width: 128px;
-    text-align: right;
-    font-size: 32px;
-}
-
-div.imgLabelHuge {
-    position: relative;
-    width: 100%;
-    height: 64px;
-}
-
-div.imgLabelHuge div.label {
-    position: absolute;
-    left: 64px;
-    top: 0;
-    width: 100%;
-    font-size: 64px;
-    font-weight: bold;
-}
-
 div.tab {
-    margin-bottom: 10px;
+    position: relative;
 }
 
 div.tabHeader {
@@ -70,33 +26,93 @@ div.tabHeader {
 div.tabHeader div.label {
     position: absolute;
     left: 16px;
-    bottom: 0;
-    padding-left: 3px;
+    top: 0;
+    height: 16px;
+    padding-left: 8px;
+}
+
+div.tabContent {
+    position: relative;
+    top: 0;
+    min-width: 369px;
+    width: 369px;
+    min-height: 128px;
+    height: 128px;
+}
+
+div.imgLabelSmall {
+    display: inline-block;
+    position: relative;
+    min-width: 80px;
+    width: 80px;
+    height: 16px;
+}
+
+div.imgLabelSmall div.label {
+    position: absolute;
+    left: 16px;
+    top: 0;
+    min-width: 64px;
+    width: 64px;
+    height: 16px;
+    text-align: right;
+    font-size: 16px;
+}
+
+div.imgLabelNormal {
+    display: inline-block;
+    position: relative;
+    min-width: 160px;
+    width: 160px;
+    height: 32px;
+}
+
+div.imgLabelNormal div.label {
+    position: absolute;
+    left: 32px;
+    top: 0;
+    min-width: 128px;
+    height: 32px;
+    text-align: right;
+    font-size: 32px;
+}
+
+div.imgLabelHuge {
+    position: relative;
+    height: 64px;
+}
+
+div.imgLabelHuge div.label {
+    position: absolute;
+    left: 64px;
+    top: 0;
+    height: 64px;
+    font-size: 64px;
     font-weight: bold;
 }
 
-div.action { height: 32px; }
-div.action div.shortcut {
-    display: inline-block;
+img.imgButtonNormal { display: inline-block; top: 0; width: 32px; height: 32px; }
+
+div.dualLabel { font-size: 32px; height: 32px; }
+div.dualLabel * { display: inline-block; }
+div.dualLabel img.A { float: left; }
+div.dualLabel div.A { float: left; }
+div.dualLabel img.B { float: right; }
+div.dualLabel div.B { float: right; }
+div.dualLabel div {
     position: relative;
     top: 0;
+    min-width: 128px;
     height: 32px;
-    width: 32px;
+    text-align: right;
     font-size: 32px;
-    text-align: center;
-}
-
-div.action img {
-    position: absolute;
-    left: 32px;
-    height: 32px;
 }
 
 /*
  *  Team colors
  */
 
-.red-normal { background-color: #F88; color: #800; }
+.red-normal { color: #800; }
 .red-active { background-color: #F00; color: #800; }
 
 /*
@@ -131,56 +147,54 @@ div.action img {
     background-color: #BBB;
 }
 
-#colonyHeader { margin-bottom: 10px; }
+#colonyHeader_imgLabel { margin-bottom: 10px; }
 
-#colonyHPBox div { display: inline-block; }
-#colonyHPBox div.label { width: 337px }
+#treasureBox { height: 64px; }
+#totalGold_imgLabel { top: 0px; float: left; }
+#plusGold_imgLabel { top: 0px; float: right; }
+#totalMana_imgLabel { bottom: 0px; float: left; }
+#plusMana_imgLabel { bottom: 0px; float: right; }
 
-#heroHPBox div { display: inline-block; }
-#heroHPBox div.label { width: 337px }
+#heroHP { width: 337px }
 
-.statRow { height: 16px; }
-.statRow div { display: inline-block; }
-
-#treasureBox { height: 32px; }
-#treasureBox div { display: inline-block; }
-#treasureBox div.mana { float: right; }
+div.statRow { height: 16px; }
+div.statRow div { display: inline-block; }
+div.statRow div.dmgshd { float: right; }
 
 #shopBox {
     height: 128px;
     overflow-y: scroll;
 }
 
-#shopBox div.item {
+div.shopItem {
     position: relative;
     width: 350px;
     height: 32px;
     background-color: #FFF;
 }
 
-#shopBox div.amountBox {
+div.shopItem div.amountBox {
     display: inline-block;
     position: absolute;
     height: 32px;
 }
 
-#shopBox div.amountBox div.plusMinus {
+div.shopItem div.amountBox div.plusMinus {
     display: inline-block;
 }
 
-#shopBox div.amountBox div.plusMinus button {
+div.shopItem div.amountBox div.plusMinus button {
     display: block;
     width: 16px;
     height: 16px;
     font-size: 16px;
     font-family: sans-serif;
-    font-weight: bold;
 }
 
-#shopBox div.amountBox div.plusMinus button.plus { top: 0; }
-#shopBox div.amountBox div.plusMinus button.minus { bottom: 0; }
+div.shopItem div.amountBox div.plusMinus button.plus { top: 0; }
+div.shopItem div.amountBox div.plusMinus button.minus { bottom: 0; }
 
-#shopBox div.amountBox div.amount {
+div.shopItem div.amountBox div.amount {
     display: inline-block;
     position: absolute;
     left: 16px;
@@ -191,7 +205,7 @@ div.action img {
     text-align: center;
 }
 
-#shopBox div.itemIcon img {
+div.shopItem div.itemIcon img {
     position: absolute;
     left: 64px;
     bottom: 0;
@@ -199,7 +213,7 @@ div.action img {
     height: 32px;
 }
 
-#shopBox div.itemName {
+div.shopItem div.itemDesc {
     display: inline-block;
     position: absolute;
     left: 96px;
@@ -209,21 +223,23 @@ div.action img {
     font-size: 10pt;
 }
 
-#shopBox div.costBox {
+div.shopItem div.costBox {
     display: inline-block;
-    position: absolute;
+    position: relative;
     left: 216px;
+    top: 0;
     width: 80px;
     height: 32px;
     font-size: 10pt;
 }
 
-#shopBox div.costBox div.gold { top: 0; }
-#shopBox div.costBox div.mana { bottom: 0; }
-
-#shopBox button.buy {
-    float: right;
-    width: 32px;
-    height: 32px;
+div.shopItem div.costBox * {
+    display: inline-block;
+    float: left;
+    position: relative;
+    top: 0;
+    height: 16px;
 }
+
+div.shopItem img.imgButtonNormal { float: right; }
 
