@@ -23,11 +23,10 @@
  *          -   flags, background
  */
 
-//  TODO    Change to Gry.Phx
-Gry.System = (function() {
+Gry.Phx = (function() {
 
     var S = function(conf) {
-        console.log('[System] conf:', conf);
+        console.log('[Phx] conf:', conf);
 
         Gry.worldScale = conf.worldScale;
 
@@ -564,7 +563,7 @@ Gry.System = (function() {
             }
         };
 
-        var tick = function() { 
+        var tick = function() {
             //console.log('[tick]', heroes);
             applyForces();
             world.Step(1/FPS, 10, 10);
@@ -606,7 +605,7 @@ Gry.System = (function() {
         world.SetContactListener(listener);
 
 
-        //console.log('[System] return G:', G);
+        //console.log('[Phx] return G:', G);
         return G;
     };
 
