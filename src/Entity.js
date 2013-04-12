@@ -28,7 +28,8 @@
 
             this.GSys = GSys;
             this.entityType = e.entityType;
-            this.body =  e.body;
+            this.body = e.body;
+            this.body.SetUserData(this);
             this.mapPos = { x: e.mapPos.x, y: e.mapPos.y },
             this.mapDim = { w: e.mapDim.w, h: e.mapDim.h }
         }

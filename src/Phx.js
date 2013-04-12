@@ -119,10 +119,9 @@ Gry.Phx = (function() {
                 return { x: Math.floor(p.x*Gry.worldScale), y: Math.floor(p.y*Gry.worldScale) };
             },
 
-            boxBodyDef: function(posW, bType, bData) {
+            boxBodyDef: function(posW, bType) {
                 var bd = new b2BodyDef();
                 bd.type = bType;
-                bd.userData = bData;
                 bd.position.Set(posW.x, posW.y);
                 //  FIXME   Magic numbers!
                 bd.linearDamping = 5;
@@ -144,11 +143,8 @@ Gry.Phx = (function() {
             //  Create a default box
             //  - at world position posW{x,y}
             //  - with half world scale size hdimW{w,h}
-            //  - with body type bType
-            //  - with user data bData
-            boxBody: function(posW, hdimW, bData) {
-                //console.log('[boxBody] posW, hdimW, bData:', posW, hdimW, bData);
-                var b = Gry.World.CreateBody(this.boxBodyDef(posW, b2Body.b2_dynamicBody, bData));
+            boxBody: function(posW, hdimW) {
+                var b = Gry.World.CreateBody(this.boxBodyDef(posW, b2Body.b2_dynamicBody));
                 b.CreateFixture(this.boxFixtDef(hdimW));
                 return b;
             },
@@ -496,32 +492,22 @@ Gry.Phx = (function() {
         };
 
         var listener = new b2ContactListener;
+
         listener.PostSolve = function(contact, impulse) {
-            var udA = contact.GetFixtureA().GetBody().GetUserData();
-            var udB = contact.GetFixtureB().GetBody().GetUserData();
-            //console.log('[ContactListener.PostSolve] udA, udB:', udA, udB);
-            if (typeof udA === 'object' && typeof udB === 'object') {
-                var unitA = udA.unitType === 'hero' ? heroes[udA.unitIdx]
-                          : udA.unitType === 'fighter' ? fighters[udA.unitIdx]
-                          : undefined;
-                var unitB = udB.unitType === 'hero' ? heroes[udB.unitIdx]
-                          : udB.unitType === 'fighter' ? fighters[udB.unitIdx]
-                          : undefined;
-                //console.log('[ContactListener.PostSolve] unitA, unitB:', unitA, unitB);
-                if (typeof unitA === 'object' && typeof unitB === 'object') {
-                    if (unitA.team !== unitB.team) {
-                        var hit = impulse.normalImpulses[0];
-                        //console.log('[ContactListener.PostSolve] hit:', hit);
-                        unitA.HP -= hit;
-                        unitB.HP -= hit;
-                        //console.log('[ContactListener.PostSolve] AFTER HIT / unitA, unitB:', unitA, unitB, hit);
-                    }
-                }
+            //  The entities are attached as user data
+            var eA = contact.GetFixtureA().GetBody().GetUserData();
+            var eB = contact.GetFixtureB().GetBody().GetUserData();
+
+            //  Damage
+            if (eA.team !== eB.team) {  //  No friendly fire
+                var hit = impulse.normalImpulses[0];
+                eA.HP -= hit;
+                eB.HP -= hit;
             }
         };
+
         Gry.World.SetContactListener(listener);
 
-        //console.log('[Phx] return G:', G);
         return G;
     };
 

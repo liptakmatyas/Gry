@@ -30,7 +30,7 @@
 
         var nFighters = 30;
         var teamsInGame = [
-            { color: 'x00',    heroLevel: 1,   fighterMode: 'shield' }
+            { color: 'x00',    heroLevel: 1,   fighterMode: 'fight' }
         ,   { color: '0x0',    heroLevel: 1,   fighterMode: 'shield' }
         ,   { color: '00x',    heroLevel: 1,   fighterMode: 'shield' }
         ];
@@ -50,7 +50,7 @@
             });
 
             /*
-            var orb = new Gry.AvoidOrb(G, { id: 'magnet', team: hero.team, radius: 10, range: 90, type: 'avoid', mapPos: { x: hero.mapPos.x-90, y: hero.mapPos.y } });
+            var orb = new Gry.AvoidOrb(G, { id: 'dangerZone', team: hero.team, radius: 10, range: 90, type: 'avoid', mapPos: { x: hero.mapPos.x-90, y: hero.mapPos.y } });
             hero.AddOrb(orb);
             */
 
