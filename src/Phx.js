@@ -405,7 +405,8 @@ Gry.Phx = (function() {
                     }
 
                     if (typeof forceFunc === 'function') {
-                        forceFunc(thisFighter, thatFighter);
+                        var fp = createForcePack(thisFighter, thatFighter);
+                        applyForce(forceFunc(thatFighter, fp), fp);
                     }
                 }
             }
