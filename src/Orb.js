@@ -45,11 +45,7 @@
 
     Gry.OrbType = {
         'avoid': {
-            force: function(fp) {
-                var F = { sym: 'a', size: -3/fp.R2 };
-                //console.log('[ORB.avoid.force] F.sym, F.size:', F.sym, F.size);
-                return F;
-            },
+            force: function(fp) { return { sym: 'a', size: -3/fp.R2 }; },
 
             draw: function(canvasCtx, pos) {
                 //console.log('[ORB.avoid.draw] pos:', pos);
@@ -60,11 +56,7 @@
         },
 
         'moveTo': {
-            force: function(fp) {
-                var F = { sym: 'a', size: fp.R2 };
-                //console.log('[ORB.moveTo.force] F.sym, F.size:', F.sym, F.size);
-                return F;
-            },
+            force: function(fp) { return { sym: 'a', size: fp.R2 }; },
 
             draw: function(canvasCtx, pos) {
                 //console.log('[ORB.moveTo.draw] pos:', pos);

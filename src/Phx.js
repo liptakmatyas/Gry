@@ -241,28 +241,39 @@ Gry.Phx = (function() {
             }
         };
 
-        //  uA, uB: units
-        //  Returns: ap{bA,bB,pA,pB,dx,dy,R2} action pack
-        //  - ap.dx, ay.dy: X/Y components of distance from A to B in world coordinates (signed!)
-        //  - ap.R2: squared distance between A and B in world coordinates
-        var createForcePack = function(uA, uB) {
-            //console.log('[createForcePack] uA, uB:', uA, uB);
-            //console.log('[createForcePack] uA.b{x,y}, uB.b{x,y}:', uA.body.GetPosition().x, uA.body.GetPosition().y, uB.body.GetPosition().x, uB.body.GetPosition().y);
+        //  eA, eB: entities
+        //  Returns: ap{eA,eB,tA,tB,bA,bB,pA,pB,dx,dy,R2} action pack
+        //  <-  .eA, .eB: entities
+        //  <-  .tA, .tB: unit/entity types for force selection
+        //  <-  .bA, .bB: Box2D bodies
+        //  <-  .pA, .pB: world positions
+        //  <-  .dx, .dy: X/Y components of distance from A to B in world scale (signed!)
+        //  <-  .R2: squared distance between A and B in world scale
+        var createForcePack = function(eA, eB) {
+            //console.log('[createForcePack] eA, eB:', eA, eB);
 
-            var bA = uA.body;
-            var bB = uB.body;
+            var bA = eA.body;
+            var bB = eB.body;
             var pA = bA.GetPosition();
             var pB = bB.GetPosition();
-            //console.log('[createForcePack] pA{x,y}, pB{x,y}:', pA.x, pA.y, pB.x, pB.y);
-
             var dx = pB.x-pA.x;
             var dy = pB.y-pA.y;
-            var R2 = dx*dx + dy*dy;
 
-            var fp = { bA: bA, bB: bB, pA:pA, pB:pB, dx:dx, dy:dy, R2:R2 };
+            var fp = {
+                eA: eA,
+                eB: eB,
+                tA: eA.entityType !== 'unit' ? eA.entityType : eA.unitType,
+                tB: eB.entityType !== 'unit' ? eB.entityType : eB.unitType,
+                bA: bA,
+                bB: bB,
+                pA: pA,
+                pB: pB,
+                dx: dx,
+                dy: dy,
+                R2: dx*dx + dy*dy
+            };
+
             //console.log('[createForcePack] fp:', fp);
-            //console.log('[createForcePack] fp.pA{x,y}, fp.pB{x,y}:', fp.pA.x, fp.pA.y, fp.pB.x, fp.pB.y);
-            //console.log('[createForcePack] fp.dx, fp.dy:', fp.dx, fp.dy);
             return fp;
         };
 
@@ -323,91 +334,69 @@ Gry.Phx = (function() {
         //      var ForceFunc = ForceChain[fidx]; // for each fidx in ForceChain
         //      var F = ForceFunc(thisUnit, thatUnit, forcePack);
 
+        var activeForces = function(fp) {
+            //console.log('[activeForces] fp:', fp);
+            if (fp.tA === 'fighter') {
+                var fm = Gry.FighterMode[fp.eA.fighterMode];
+                if (typeof fm !== 'object') return;
+                if (fp.tB === 'fighter') {
+                    return (fp.eA.team === fp.eB.team) ? fm.toOwnFighter : fm.toEnemyFighter;
+                }
+                else if (fp.tB === 'hero') {
+                    return (fp.eA.team === fp.eB.team) ? fm.toOwnHero : fm.toEnemyHero;
+                }
+            }
+            else if (fp.tA === 'hero') {
+                if (fp.tB === 'orb') {
+                    return Gry.OrbType[fp.eB.name].force;
+                }
+                else if (fp.tB === 'hero') {
+                    return function(fp) { return { sym: 'ab', size: -2/fp.R2 }; };
+                }
+            }
+        };
+
+        var applyForcesFrom = function(entityA, entityB) {
+            var fp = createForcePack(entityA, entityB);
+            var forceFunc = activeForces(fp);
+            if (typeof forceFunc !== 'function') return;
+            applyForce(forceFunc(fp), fp);
+        };
+
         var applyForces = function() {
             var nHeroes = heroes.length;
             var nFighters = fighters.length;
             var i, j;
-            //console.log('[applyForces] nHeroes, heroes:', nHeroes, heroes);
-            //console.log('[applyForces] nFighters, fighters:', nFighters, fighters);
 
             for (i = 0; i < nHeroes; ++i) {
-                var heroA = heroes[i];
-                if (heroA === null) continue;
-                //console.log('[applyForces] heroA:', heroA);
-                //console.log('[applyForces] heroA.x, heroA.y:', heroA.mapPos.x, heroA.mapPos.y);
-                //console.log('[applyForces] heroA.body{x,y}:', heroA.body.GetPosition().x, heroA.body.GetPosition().y);
-
-                var orbs = heroA.orbs;
+                var thisHero = heroes[i];
+                if (thisHero === null) continue;
+                var orbs = thisHero.orbs;
                 for (var orbName in orbs) {
-                    var orbB = orbs[orbName];
-                    //console.log('[applyForces] orbName, orbB:', orbName, orbB);
-                    //console.log('[applyForces] orbB.x, orbB.y:', orbB.mapPos.x, orbB.mapPos.y);
-                    //console.log('[applyForces] orbB.body{x,y}:', orbB.body.GetPosition().x, orbB.body.GetPosition().y);
-                    var orbForce = Gry.OrbType[orbName].force;
-                    if (typeof orbForce === 'function' && orbB !== null) {
-                        var fp = createForcePack(heroA, orbB);
-                        applyForce(orbForce(fp), fp);
-                        //console.log('[applyForces] heroA.x, heroA.y:', heroA.mapPos.x, heroA.mapPos.y);
-                        //console.log('[applyForces] heroA.body{x,y}:', heroA.body.GetPosition().x, heroA.body.GetPosition().y);
-                    }
-                    else {
-                        throw 'Bad orb: '+orbB;
-                    }
+                    var thatOrb = orbs[orbName];
+                    if (thatOrb === null) continue;
+                    applyForcesFrom(thisHero, thatOrb);
                 }
-
                 for (j = i+1; j < nHeroes; ++j) {
-                    var heroB = heroes[j];
-                    if (heroB === null) continue;
-                    var bodyB = heroB.body;
-
-                    var ap = createForcePack(heroA, heroB);
-                    //var F = 100/ap.R2;
-                    var F = -2/ap.R2;
-                    applyForce({ sym: 'ab', size: F }, fp);
+                    var thatHero = heroes[j];
+                    if (thatHero === null) continue;
+                    applyForcesFrom(thisHero, thatHero);
                 }
             }
 
             for (i = 0; i < nFighters; ++i) {
                 var thisFighter = fighters[i];
                 if (thisFighter === null) continue;
-                var fm = Gry.FighterMode[thisFighter.fighterMode];
-                //console.log('[applyForces] i, thisFighter, fm:', i, thisFighter, fm);
-
                 for (j = 0; j < nHeroes; ++j) {
                     var thatHero = heroes[j];
                     if (thatHero === null) continue;
-
-                    var forceFunc = null;
-                    if (thisFighter.team === thatHero.team) {
-                        forceFunc = fm.toOwnHero;
-                    }
-                    else {
-                        forceFunc = fm.toEnemyHero;
-                    }
-
-                    if (typeof forceFunc === 'function') {
-                        var fp = createForcePack(thisFighter, thatHero);
-                        applyForce(forceFunc(thatHero, fp), fp);
-                    }
+                    applyForcesFrom(thisFighter, thatHero);
                 }
-
                 for (j = 0; j < nFighters; ++j) {
                     if (j === i) continue;
                     var thatFighter = fighters[j];
                     if (thatFighter === null) continue;
-
-                    var forceFunc = null;
-                    if (thisFighter.team === thatFighter.team) {
-                        forceFunc = fm.toOwnFighter;
-                    }
-                    else {
-                        forceFunc = fm.toEnemyFighter;
-                    }
-
-                    if (typeof forceFunc === 'function') {
-                        var fp = createForcePack(thisFighter, thatFighter);
-                        applyForce(forceFunc(thatFighter, fp), fp);
-                    }
+                    applyForcesFrom(thisFighter, thatFighter);
                 }
             }
         };

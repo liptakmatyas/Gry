@@ -62,19 +62,19 @@
         //  Own hero: attracts with radius
         //  Enemy fighters: attract
         'shield': {
-            toOwnHero:      function(thatHero, fp) { return { sym: 'a', size: 8*(fp.R2-shieldRadius*thatHero.level), }; },
+            toOwnHero:      function(fp) { return { sym: 'a', size: 8*(fp.R2-shieldRadius*fp.eB.level), }; },
             toEnemyHero:    null,
             toOwnFighter:   null,
-            toEnemyFighter: function(thatFighter, fp) { return { sym: 'a', size: 0.5/fp.R2 }; }
+            toEnemyFighter: function(fp) { return { sym: 'a', size: 0.5/fp.R2 }; }
         },
 
         //  Enemy heroes: attract
         //  Enemy fighters: attract
         'fight': {
             toOwnHero:      null,
-            toEnemyHero:    function(thatHero, fp) { return { sym: 'a', size: 4/fp.R2 }; },
+            toEnemyHero:    function(fp) { return { sym: 'a', size: 4/fp.R2 }; },
             toOwnFighter:   null,
-            toEnemyFighter: function(thatFighter, fp) { return { sym: 'a', size: 1/fp.R2 }; }
+            toEnemyFighter: function(fp) { return { sym: 'a', size: 1/fp.R2 }; }
         }
     };
 
