@@ -45,7 +45,7 @@
 
     Gry.OrbType = {
         'avoid': {
-            force: function(fp) { return { sym: 'a', size: -3/fp.R2 }; },
+            force: function(fp) { return { sym: 'a', size: -400/fp.R2 }; },
 
             draw: function(canvasCtx, pos) {
                 //console.log('[ORB.avoid.draw] pos:', pos);
@@ -56,7 +56,7 @@
         },
 
         'moveTo': {
-            force: function(fp) { return { sym: 'a', size: fp.R2 }; },
+            force: function(fp) { return { sym: 'a', size: 0.8*fp.R2 }; },
 
             draw: function(canvasCtx, pos) {
                 //console.log('[ORB.moveTo.draw] pos:', pos);
@@ -79,10 +79,11 @@
                 mapDim: { w: 20, h: 20 }
             });
 
-            this.name = orb.name;
+            this.id = orb.id;
+            this.type = orb.type;
             this.orbIdx = orb.orbIdx;
             this.radius = 10;
-            this.draw = Gry.OrbType[orb.name].draw;
+            this.draw = Gry.OrbType[orb.type].draw;
         }
     });
 

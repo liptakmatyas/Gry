@@ -29,12 +29,31 @@
             });
 
             this.level = stat.level;
-            this.orbs = {
-                'avoid':    new Gry.Orb(GSys, { name: 'avoid',  mapPos: stat.flagPos.avoid }),
-                'moveTo':   new Gry.Orb(GSys, { name: 'moveTo', mapPos: stat.flagPos.moveTo })
-            };
+            this.orbs = [];
             this.symbol = stat.symbol;
-        }
+        },
+
+        AddOrb: function(orbStat) {
+            //console.log('[Hero.AddOrb] this, orbStat:', this, orbStat);
+            var orb = new Gry.Orb(this.GSys, orbStat);
+            //console.log('[Hero.AddOrb] NEW orb:', orb);
+            this.orbs.push(orb);
+            return this;
+        },
+
+        RemoveOrbId: function(orbId) {
+            //console.log('[Hero.RemoveOrbId] this, orbId:', this, orbId);
+            var orbs = this.orbs;
+            var n = orbs.length;
+            for (var i = 0; i < n; ++i) {
+                if (orbs[i].id === orbId) {
+                    orbs.splice(i, 1);
+                    break;  //  The id should be unique...
+                }
+            }
+            return this;
+        },
+
     });
 
 }(jQuery));

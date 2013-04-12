@@ -69,13 +69,15 @@ Gry.Phx = (function() {
                 heroes.push(H);
                 //console.log('[AddHero] H.x, H.y:', H.mapPos.x, H.mapPos.y);
                 //console.log('[AddHero] H.body{x,y}:', H.body.GetPosition().x, H.body.GetPosition().y);
-                console.log('[AddHero] Added hero:', H);
+                //console.log('[AddHero] Added hero:', H);
+                return H;
             },
 
             AddFighter: function(stat) {
                 stat.unitIdx = fighters.length;
                 var F = new Gry.Fighter(this, stat);
                 fighters.push(F);
+                return F;
             },
 
             StartLoop: function() {
@@ -112,6 +114,9 @@ Gry.Phx = (function() {
                 bd.type = bType;
                 bd.userData = bData;
                 bd.position.Set(posW.x, posW.y);
+                //  FIXME   Magic numbers!
+                bd.linearDamping = 5;
+                bd.angularDamping = 2;
                 return bd;
             },
 
@@ -135,7 +140,6 @@ Gry.Phx = (function() {
                 //console.log('[boxBody] posW, hdimW, bData:', posW, hdimW, bData);
                 var b = Gry.World.CreateBody(this.boxBodyDef(posW, b2Body.b2_dynamicBody, bData));
                 b.CreateFixture(this.boxFixtDef(hdimW));
-                b.SetLinearDamping(6);  //  FIXME   Magic number!
                 return b;
             },
 
@@ -288,7 +292,7 @@ Gry.Phx = (function() {
             var TYPE_SPECIFIC_FORCES = {
                 'hero': {
                     'hero':     function(fp) { return function(fp) { return { sym: 'a', size: -2/fp.R2 }; }; },
-                    'orb':      function(fp) { return Gry.OrbType[fp.eB.name].force; }
+                    'orb':      function(fp) { return Gry.OrbType[fp.eB.type].force; }
                 },
                 'fighter': {
                     'fighter':  function(fp) { return Gry.FighterMode[fp.eA.fighterMode].toFighter; },
@@ -321,8 +325,9 @@ Gry.Phx = (function() {
                 var thisHero = heroes[i];
                 if (thisHero === null) continue;
                 var orbs = thisHero.orbs;
-                for (var orbName in orbs) {
-                    var thatOrb = orbs[orbName];
+                var nOrbs = orbs.length;
+                for (j = 0; j < nOrbs; ++j) {
+                    var thatOrb = orbs[j];
                     if (thatOrb === null) continue;
                     applyForcesFrom(thisHero, thatOrb);
                 }
@@ -406,10 +411,11 @@ Gry.Phx = (function() {
                 canvasCtx.strokeStyle = scaledTeamColor(hero.team, 1);
 
                 var orbs = hero.orbs;
-                for (var orbName in orbs) {
-                    var orb = orbs[orbName];
+                var nOrbs = orbs.length;
+                for (j = 0; j < nOrbs; ++j) {
+                    var orb = orbs[j];
                     if (orb !== null) {
-                        var orbDraw = Gry.OrbType[orbName].draw;
+                        var orbDraw = Gry.OrbType[orb.type].draw;
                         if (typeof orb.draw !== 'function') { throw 'orb.draw is not a function'; }
                         orb.draw(canvasCtx, orb.mapPos);
                     }

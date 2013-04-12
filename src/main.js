@@ -28,9 +28,9 @@
             isDebugMode: false
         });
 
-        var nFighters = 10;
+        var nFighters = 50;
         var teamsInGame = [
-            { color: 'x00',    heroLevel: 1,   fighterMode: 'fight' }
+            { color: 'x00',    heroLevel: 1,   fighterMode: 'shield' }
         ,   { color: '0x0',    heroLevel: 1,   fighterMode: 'shield' }
         ,   { color: '00x',    heroLevel: 1,   fighterMode: 'shield' }
         ];
@@ -39,18 +39,34 @@
         for (i = 0; i < n; ++i) {
             var team = teamsInGame[i];
             var maxHP = team.heroLevel*100;
+
             var hero = G.AddHero({
                 symbol: String.fromCharCode(parseInt('25A3', 16)),
                 level: team.heroLevel,
                 HP: maxHP,
                 maxHP: maxHP,
                 team: team.color,
-                mapPos: Gry.rndPos(G.MapDim()),
-                flagPos: {
-                    avoid: Gry.rndPos(G.MapDim()),
-                    moveTo: Gry.rndPos(G.MapDim())
-                }
+                mapPos: Gry.rndPos(G.MapDim())
             });
+
+            var jumpy = function(hero, orbType) {
+                (function(hero, orbId, orbType) {
+                    var on = false;
+                    var intv = 1000;
+                    var jumpy = function(hero, orbId, orbType) {
+                        if (on) { hero.RemoveOrbId(orbId); on = false; }
+                        else { hero.AddOrb({ id: orbId, type: orbType, mapPos: Gry.rndPos(G.MapDim()) }); on = true; }
+                        if (hero.HP > 0) { setTimeout(function() { jumpy(hero, orbId, orbType) }, intv); }
+                    };
+                    setTimeout(function() { jumpy(hero, orbId, orbType) }, intv);
+                }(hero, 'jumpy_'+orbType, orbType));
+            };
+            jumpy(hero, 'moveTo');
+
+            (function(hero) {
+                setTimeout(function() { jumpy(hero, 'avoid'); }, 500);
+            }(hero));
+
             for (j = 0; j < nFighters; ++j) {
                 var maxHP = 50;
                 var fighter = G.AddFighter({
