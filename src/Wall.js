@@ -1,4 +1,4 @@
-(function($) {
+(function() {
 
     var wallBodyDef = function(posW, bType, bData) {
         var bd = new b2BodyDef();
@@ -51,6 +51,6 @@
         }
     });
 
-}(jQuery));
+}());
 
 

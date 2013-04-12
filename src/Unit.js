@@ -1,4 +1,4 @@
-(function($) {
+(function() {
 
     //  The unit type classes register themselves in this object
     Gry.UnitType = {};
@@ -66,6 +66,6 @@
 
     });
 
-}(jQuery));
+}());
 
 

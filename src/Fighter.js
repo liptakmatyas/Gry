@@ -1,4 +1,4 @@
-(function($) {
+(function() {
 
     Gry.UnitType.FIGHTER = 'fighter';
 
@@ -70,5 +70,5 @@
         }
     };
 
-}(jQuery));
+}());
 

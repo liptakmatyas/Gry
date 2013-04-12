@@ -1,4 +1,4 @@
-(function($) {
+(function() {
 
     var orbBodyDef = function(posW, bType, bData) {
         var bd = new b2BodyDef();
@@ -87,6 +87,6 @@
         }
     });
 
-}(jQuery));
+}());
 
 

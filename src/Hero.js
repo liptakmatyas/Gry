@@ -1,4 +1,4 @@
-(function($) {
+(function() {
 
     Gry.UnitType.HERO = 'hero';
 
@@ -56,5 +56,5 @@
 
     });
 
-}(jQuery));
+}());
 
