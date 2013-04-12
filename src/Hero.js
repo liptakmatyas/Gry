@@ -1,33 +1,39 @@
-Gry.Hero = (function($) {
+(function($) {
 
-    var H = function(GSys, stat) {
-        //console.log('[Hero.New] stat:', stat);
-        var size = 10*stat.level;
-        var hero = Gry.Unit(GSys, {
-            unitType: 'hero',
-            unitIdx: stat.unitIdx,
-
-            team: stat.team,
-            HP: stat.HP,
-            maxHP: stat.maxHP,
-            level: stat.level,
-            flags: {
-                avoid: stat.flagPos.avoid,
-                moveTo: stat.flagPos.moveTo
-            },
-
-            body: null,
-            symbol: stat.symbol,
-            mapPos: { x: stat.mapPos.x, y: stat.mapPos.y },
-            imgW: size,
-            imgH: size
-        });
-
-        //console.log('[Hero.New] RETURNED hero:', hero);
-        return hero;
+    //  Add .orbIdx to all elements in the orbs array, accoding to their index
+    var indexOrbList = function(orbs) {
+        var n = orbs.length;
+        for (var i = 0; i < n; ++i) {
+            orbs[i].orbIdx = i;
+        }
+        return orbs;
     };
 
-    return H;
+    Gry.Hero = Gry.Unit.extend({
+        init: function(GSys, stat) {
+            //console.log('[Hero.init] stat:', stat);
+
+            var size = 20*stat.level;
+
+            this._super(GSys, {
+                unitType: 'hero',
+                unitIdx: stat.unitIdx,
+
+                team: stat.team,
+                HP: stat.HP,
+                maxHP: stat.maxHP,
+                mapPos: { x: stat.mapPos.x, y: stat.mapPos.y },
+                mapDim: { w: size, h: size }
+            });
+
+            this.level = stat.level;
+            this.orbs = {
+                'avoid':    new Gry.Orb(GSys, { name: 'avoid',  mapPos: stat.flagPos.avoid }),
+                'moveTo':   new Gry.Orb(GSys, { name: 'moveTo', mapPos: stat.flagPos.moveTo })
+            };
+            this.symbol = stat.symbol;
+        }
+    });
 
 }(jQuery));
 

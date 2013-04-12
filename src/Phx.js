@@ -25,8 +25,8 @@
 
 Gry.Phx = (function() {
 
-    var S = function(conf) {
-        console.log('[Phx] conf:', conf);
+    var GPhx = function(conf) {
+        //console.log('[Phx] conf:', conf);
 
         Gry.worldScale = conf.worldScale;
 
@@ -44,9 +44,6 @@ Gry.Phx = (function() {
         var $canvas = null;
         var canvasCtx = null;
 
-        var world = null;
-        var bodyDef = null;
-        var fixtDef = null;
         var viewDimW = null;
 
         var FPS = 30;
@@ -68,14 +65,16 @@ Gry.Phx = (function() {
 
             AddHero: function(stat) {
                 stat.unitIdx = heroes.length;
-                var H = Gry.Hero(this, stat);
+                var H = new Gry.Hero(this, stat);
                 heroes.push(H);
-                console.log('[Gry.AddHero] Added hero:', H);
+                //console.log('[AddHero] H.x, H.y:', H.mapPos.x, H.mapPos.y);
+                //console.log('[AddHero] H.body{x,y}:', H.body.GetPosition().x, H.body.GetPosition().y);
+                console.log('[AddHero] Added hero:', H);
             },
 
             AddFighter: function(stat) {
                 stat.unitIdx = fighters.length;
-                var F = Gry.Fighter(this, stat);
+                var F = new Gry.Fighter(this, stat);
                 fighters.push(F);
             },
 
@@ -108,26 +107,40 @@ Gry.Phx = (function() {
                 return { x: Math.floor(p.x*Gry.worldScale), y: Math.floor(p.y*Gry.worldScale) };
             },
 
+            boxBodyDef: function(posW, bType, bData) {
+                var bd = new b2BodyDef();
+                bd.type = bType;
+                bd.userData = bData;
+                bd.position.Set(posW.x, posW.y);
+                return bd;
+            },
+
+            boxFixtDef: function(hdimW) {
+                var fd = new b2FixtureDef();
+                fd.density      = 1.0;
+                fd.friction     = 1.0;
+                fd.restitution  = 0.00001;
+
+                fd.shape = new b2PolygonShape();
+                fd.shape.SetAsBox(hdimW.w, hdimW.h);
+                return fd;
+            },
+
             //  Create a default box
             //  - at world position posW{x,y}
             //  - with half world scale size hdimW{w,h}
             //  - with body type bType
             //  - with user data bData
-            createBox: function(posW, hdimW, bType, bData) {
-                //console.log('[createBox] posW, hdimW, bType, bData:', posW, hdimW, bType, bData);
-                bodyDef.type = bType;
-                bodyDef.userData = bData;
-                bodyDef.position.Set(posW.x, posW.y);
-                fixtDef.shape = new b2PolygonShape();
-                fixtDef.shape.SetAsBox(hdimW.w, hdimW.h);
-
-                var b =  world.CreateBody(bodyDef);
-                b.CreateFixture(fixtDef);
-                b.SetLinearDamping(6);
+            boxBody: function(posW, hdimW, bData) {
+                //console.log('[boxBody] posW, hdimW, bData:', posW, hdimW, bData);
+                var b = Gry.World.CreateBody(this.boxBodyDef(posW, b2Body.b2_dynamicBody, bData));
+                b.CreateFixture(this.boxFixtDef(hdimW));
+                b.SetLinearDamping(6);  //  FIXME   Magic number!
                 return b;
             },
 
         };
+
         /*
          *  Setup DOM
          */
@@ -157,30 +170,40 @@ Gry.Phx = (function() {
          *  Setup Box2D
          */
 
-        world = new b2World(new b2Vec2(0, 0), true);
-        bodyDef = new b2BodyDef();
-        fixtDef = new b2FixtureDef();
-        fixtDef.density = 1;
-        fixtDef.friction = 1;
-        fixtDef.restitution = 0.00001;
+        Gry.World = new b2World(new b2Vec2(0, 0), true);
 
-        //  wall thickness = 30
-        viewDimW = G.scaleDim2W({ w: viewWidth, h: viewHeight });
-        var horizWallHdim = G.scaleDim2W({ w: viewWidth/2, h: 15 });
-        var vertWallHdim = G.scaleDim2W({ w: 15, h: viewHeight/2 });
-        G.createBox(G.scalePos2W({ x:viewWidthHalf, y:viewHeight }), horizWallHdim, b2Body.b2_staticBody);
-        G.createBox(G.scalePos2W({ x:viewWidthHalf, y:0 }), horizWallHdim, b2Body.b2_staticBody);
-        G.createBox(G.scalePos2W({ x:0, y:viewHeightHalf }), vertWallHdim, b2Body.b2_staticBody);
-        G.createBox(G.scalePos2W({ x:viewWidth, y:viewHeightHalf }), vertWallHdim, b2Body.b2_staticBody);
+        var wallThickness = 30;
+        var horizWallDim = { w: viewWidth, h: wallThickness };
+        var vertWallDim = { w: wallThickness, h: viewHeight };
+        new Gry.Wall(G, {
+            wallIdx: 0,
+            mapPos: { x: viewWidthHalf, y: viewHeight },
+            mapDim: horizWallDim
+        });
+        new Gry.Wall(G, {
+            wallIdx: 1,
+            mapPos: { x: viewWidthHalf, y: 0 },
+            mapDim: horizWallDim
+        });
+        new Gry.Wall(G, {
+            wallIdx: 2,
+            mapPos: { x: 0, y: viewHeightHalf },
+            mapDim: vertWallDim
+        });
+        new Gry.Wall(G, {
+            wallIdx: 3,
+            mapPos: { x: viewWidth, y: viewHeightHalf },
+            mapDim: vertWallDim
+        });
 
         if (isDebugMode) {
             debugDraw = new b2DebugDraw();
             debugDraw.SetSprite(canvasCtx);
-            debugDraw.SetDrawScale(worldScale);
+            debugDraw.SetDrawScale(Gry.worldScale);
             debugDraw.SetFillAlpha(0.9);
             debugDraw.SetLineThickness(1.0);
             debugDraw.SetFlags(b2DebugDraw.e_shapeBit | b2DebugDraw.e_jointBit);
-            world.SetDebugDraw(debugDraw);
+            Gry.World.SetDebugDraw(debugDraw);
         }
 
         //  F: absolute force size, without direction; float
@@ -194,115 +217,53 @@ Gry.Phx = (function() {
             return v;
         };
 
-        //  body: Box2D body
-        //  F: absolute force; float
-        //  ap{dx,dy,R2}: action pack
-        var applyAsymForce = function(body, F, ap) {
-            //console.log('[applyAsymForce] body, F, ap:', body, F, ap);
-            body.ApplyForce(FVec(F, ap.dx, ap.dy), body.GetWorldCenter());
+        //  applyForce(bodyA,bodyB,F,fp): Apply calculated force
+        //  -   F{sym,size}: force symmetry and size
+        //  -   fp{bA,bB,pA,pB,dx,dy,R2}: force pack
+        var applyForce = function(F, fp) {
+            //console.log('[applyForce] F, fp:', F, fp);
+
+            var bodyA = fp.bA;
+            var bodyB = fp.bB;
+
+            if (F.sym === 'a') {
+                bodyA.ApplyForce(FVec(F.size, fp.dx, fp.dy), bodyA.GetWorldCenter());
+            }
+            else if (F.sym === 'b') {
+                bodyB.ApplyForce(FVec(F.size, fp.dx, fp.dy), bodyB.GetWorldCenter());
+            }
+            else if (F.sym === 'ab') {
+                bodyA.ApplyForce(FVec(F.size, fp.dx, fp.dy), bodyA.GetWorldCenter());
+                bodyB.ApplyForce(FVec(-F.size, fp.dx, fp.dy), bodyB.GetWorldCenter());
+            }
+            else {
+                throw 'Bad symmetry: '+F.sym;
+            }
         };
 
-        //  A, B: Box2D bodies
-        //  F: absolute force; float
-        //  ap{dx,dy,R2}: action pack
-        var applySymForce = function(A, B, F, ap) {
-            //console.log('[applySymForce] A, B, F, ap:', A, B, F, ap);
-            var FA = FVec(F, ap.dx, ap.dy);
-            var FB = FVec(-F, ap.dx, ap.dy);
-            //console.log('[applySymForce] FA, FB:', FA, FB);
-            A.ApplyForce(FA, A.GetWorldCenter());
-            B.ApplyForce(FB, B.GetWorldCenter());
-        };
-
-        //  pA{x,y}, pB{x,y}: positions of the Box2D bodies
-        //  Returns: ap{dx,dy,R2} action pack
+        //  uA, uB: units
+        //  Returns: ap{bA,bB,pA,pB,dx,dy,R2} action pack
         //  - ap.dx, ay.dy: X/Y components of distance from A to B in world coordinates (signed!)
         //  - ap.R2: squared distance between A and B in world coordinates
-        var createActionPack = function(pA, pB) {
-            //console.log('[createActionPack] pA, pB:', pA, pB);
+        var createForcePack = function(uA, uB) {
+            //console.log('[createForcePack] uA, uB:', uA, uB);
+            //console.log('[createForcePack] uA.b{x,y}, uB.b{x,y}:', uA.body.GetPosition().x, uA.body.GetPosition().y, uB.body.GetPosition().x, uB.body.GetPosition().y);
+
+            var bA = uA.body;
+            var bB = uB.body;
+            var pA = bA.GetPosition();
+            var pB = bB.GetPosition();
+            //console.log('[createForcePack] pA{x,y}, pB{x,y}:', pA.x, pA.y, pB.x, pB.y);
+
             var dx = pB.x-pA.x;
             var dy = pB.y-pA.y;
             var R2 = dx*dx + dy*dy;
-            //console.log('[createActionPack] dx, dy, R2:', dx, dy, R2);
-            return { dx:dx, dy:dy, R2:R2 };
-        };
 
-        //  Forces between heroes and their flags.
-        //  All functions have the same parameters:
-        //  body: Box2D body of hero
-        //  ap{dx,dy,R2}: action pack
-        var flag = {
-            'avoid': {
-                force: function(body, ap) {
-                    return -3/ap.R2;
-                },
-                draw: function(pos) {
-                    canvasCtx.beginPath();
-                    canvasCtx.arc(pos.x, pos.y, 10, 0, 2*Math.PI, false);
-                    canvasCtx.stroke();
-                }
-            },
-            'moveTo': {
-                force: function(body, ap) {
-                    return 1*ap.R2;
-                },
-                draw: function(pos) {
-                    canvasCtx.beginPath();
-                    canvasCtx.arc(pos.x, pos.y, 10, 0, 2*Math.PI, false);
-                    canvasCtx.fill();
-                }
-            }
-        };
-
-        var shieldRadius = 1;
-        var fighterModes = {
-            'shield': {
-                toHero: function(thisFighter, thatHero) {
-                    //  Own hero: attracts with radius
-                    //  other heroes: neutral
-                    if (thisFighter.team === thatHero.team) {
-                        var thisBody = thisFighter.body;
-                        var ap = createActionPack(thisBody.GetPosition(), thatHero.body.GetPosition());
-                        var F = 8*(ap.R2-shieldRadius*thatHero.level);
-                        applyAsymForce(thisBody, F, ap);
-                    }
-                },
-                toFighter: function(thisFighter, thatFighter) {
-                    //  Own team's fighters: neutral
-                    //  other fighters: attract
-                    if (thisFighter.team !== thatFighter.team) {
-                        var thisBody = thisFighter.body;
-                        var thatBody = thatFighter.body;
-                        var ap = createActionPack(thisBody.GetPosition(), thatBody.GetPosition());
-                        var F = 0.5/ap.R2;
-                        applyAsymForce(thisBody, F, ap);
-                    }
-                }
-            },
-
-            'fight': {
-                toHero: function(thisFighter, thatHero) {
-                    //  Own hero: neutral
-                    //  other heroes: attract
-                    if (thisFighter.team !== thatHero.team) {
-                        var thisBody = thisFighter.body;
-                        var ap = createActionPack(thisBody.GetPosition(), thatHero.body.GetPosition());
-                        var F = 4/ap.R2;
-                        applyAsymForce(thisBody, F, ap);
-                    }
-                },
-                toFighter: function(thisFighter, thatFighter) {
-                    //  Own team's fighters: neutral
-                    //  other fighters: attract
-                    if (thisFighter.team !== thatFighter.team) {
-                        var thisBody = thisFighter.body;
-                        var thatBody = thatFighter.body;
-                        var ap = createActionPack(thisBody.GetPosition(), thatBody.GetPosition());
-                        var F = 1/ap.R2;
-                        applyAsymForce(thisBody, F, ap);
-                    }
-                }
-            }
+            var fp = { bA: bA, bB: bB, pA:pA, pB:pB, dx:dx, dy:dy, R2:R2 };
+            //console.log('[createForcePack] fp:', fp);
+            //console.log('[createForcePack] fp.pA{x,y}, fp.pB{x,y}:', fp.pA.x, fp.pA.y, fp.pB.x, fp.pB.y);
+            //console.log('[createForcePack] fp.dx, fp.dy:', fp.dx, fp.dy);
+            return fp;
         };
 
         //  TODO    Generalize forces
@@ -330,7 +291,7 @@ Gry.Phx = (function() {
         //
         //  var udHero = {
         //      t: 'hero',                  //  fixed
-        //      n: "heroName",              //  user-defined, but *UNIQUE*, and not a "system type" (wall, fighter, ...)
+        //      n: "heroName",              //  user-defined, but *UNIQUE*, and not a "system type"
         //      i: unitIdx                  //  unit index in units[udUnit.t][i] (instead of fighters[])
         //  };
         //
@@ -351,7 +312,7 @@ Gry.Phx = (function() {
         //      var thatUnit = units[thatUd.t][thatUd.i];
 
         //  forcePack{bA,bB,pA,pB,dx,dy,R2}
-        //      var forcePack = createForcePack(thisUnit, thatUnit); // TODO Formerly known as createActionPack()
+        //      var forcePack = createForcePack(thisUnit, thatUnit); // TODO Formerly known as createForcePack()
 
         //  force[][][fidx](uA,uB,ap) is a 3D array of force functions
         //  -   A force function should calculate the size of the force vector, and apply it (sym/asym)
@@ -372,16 +333,25 @@ Gry.Phx = (function() {
             for (i = 0; i < nHeroes; ++i) {
                 var heroA = heroes[i];
                 if (heroA === null) continue;
-                var bodyA = heroA.body;
+                //console.log('[applyForces] heroA:', heroA);
+                //console.log('[applyForces] heroA.x, heroA.y:', heroA.mapPos.x, heroA.mapPos.y);
+                //console.log('[applyForces] heroA.body{x,y}:', heroA.body.GetPosition().x, heroA.body.GetPosition().y);
 
-                for (var flagName in heroA.flags) {
-                    var flagTarget = heroA.flags[flagName];
-                    if (flagTarget !== null && typeof flag[flagName].force === 'function') {
-                        //  flagTarget{x,y} is stored in map coordinates, need world coordinates
-                        flagTarget = G.scalePos2W(flagTarget);
-                        var ap = createActionPack(bodyA.GetPosition(), flagTarget);
-                        var F = flag[flagName].force(bodyA, ap);
-                        applyAsymForce(bodyA, F, ap);
+                var orbs = heroA.orbs;
+                for (var orbName in orbs) {
+                    var orbB = orbs[orbName];
+                    //console.log('[applyForces] orbName, orbB:', orbName, orbB);
+                    //console.log('[applyForces] orbB.x, orbB.y:', orbB.mapPos.x, orbB.mapPos.y);
+                    //console.log('[applyForces] orbB.body{x,y}:', orbB.body.GetPosition().x, orbB.body.GetPosition().y);
+                    var orbForce = Gry.OrbType[orbName].force;
+                    if (typeof orbForce === 'function' && orbB !== null) {
+                        var fp = createForcePack(heroA, orbB);
+                        applyForce(orbForce(fp), fp);
+                        //console.log('[applyForces] heroA.x, heroA.y:', heroA.mapPos.x, heroA.mapPos.y);
+                        //console.log('[applyForces] heroA.body{x,y}:', heroA.body.GetPosition().x, heroA.body.GetPosition().y);
+                    }
+                    else {
+                        throw 'Bad orb: '+orbB;
                     }
                 }
 
@@ -390,24 +360,34 @@ Gry.Phx = (function() {
                     if (heroB === null) continue;
                     var bodyB = heroB.body;
 
-                    var ap = createActionPack(bodyA.GetPosition(), bodyB.GetPosition());
+                    var ap = createForcePack(heroA, heroB);
                     //var F = 100/ap.R2;
                     var F = -2/ap.R2;
-                    applySymForce(bodyA, bodyB, F, ap);
+                    applyForce({ sym: 'ab', size: F }, fp);
                 }
             }
 
             for (i = 0; i < nFighters; ++i) {
                 var thisFighter = fighters[i];
                 if (thisFighter === null) continue;
-                var fm = fighterModes[thisFighter.fighterMode];
+                var fm = Gry.Fighter.MODE[thisFighter.fighterMode];
+                //console.log('[applyForces] i, thisFighter, fm:', i, thisFighter, fm);
 
                 for (j = 0; j < nHeroes; ++j) {
                     var thatHero = heroes[j];
                     if (thatHero === null) continue;
-                    var forceFunc = fm.toHero;
+
+                    var forceFunc = null;
+                    if (thisFighter.team === thatHero.team) {
+                        forceFunc = fm.toOwnHero;
+                    }
+                    else {
+                        forceFunc = fm.toEnemyHero;
+                    }
+
                     if (typeof forceFunc === 'function') {
-                        forceFunc(thisFighter, thatHero);
+                        var fp = createForcePack(thisFighter, thatHero);
+                        applyForce(forceFunc(thatHero, fp), fp);
                     }
                 }
 
@@ -415,33 +395,20 @@ Gry.Phx = (function() {
                     if (j === i) continue;
                     var thatFighter = fighters[j];
                     if (thatFighter === null) continue;
-                    var forceFunc = fm.toFighter;
+
+                    var forceFunc = null;
+                    if (thisFighter.team === thatFighter.team) {
+                        forceFunc = fm.toOwnFighter;
+                    }
+                    else {
+                        forceFunc = fm.toEnemyFighter;
+                    }
+
                     if (typeof forceFunc === 'function') {
                         forceFunc(thisFighter, thatFighter);
                     }
                 }
             }
-        };
-
-        //  u{body} -> u{body,box{hW,hH,a},mapPos{x,y}}
-        //
-        //  NOTE:   Assumes having exactly one fixture: a rectangle.
-        //          (Units are squares at the moment.)
-        var updateUnit = function(u) {
-            //console.log('[updateUnit] PREVIOUS u:', u);
-            var body = u.body;
-            var fixt = body.GetFixtureList();
-            var vert = fixt.GetShape().GetVertices();
-            var dim = G.scaleDim2M({ w: vert[1].x-vert[0].x, h: vert[2].y-vert[1].y });
-            var cPos = G.scalePos2M(body.GetPosition());
-            u.box = {
-                hW: dim.w/2,
-                hH: dim.h/2,
-                a: body.GetAngle()
-            };
-            u.mapPos = { x: cPos.x, y: cPos.y };
-            //console.log('[updateUnit] UPDATED u:', u);
-            return u;
         };
 
         var scaledTeamColor = function(team, scale) {
@@ -465,12 +432,15 @@ Gry.Phx = (function() {
             for (i = 0; i < nHeroes; ++i) {
                 var hero = heroes[i];
                 if (hero === null) continue;
+                //console.log('[updateView] hero.x, hero.y:', hero.mapPos.x, hero.mapPos.y);
+                //console.log('[updateView] hero.body{x,y}:', hero.body.GetPosition().x, hero.body.GetPosition().y);
+
                 if (hero.HP > 0) {
-                    updateUnit(hero);
+                    hero.updateMapPosDim();
                 } else {
-                    console.log('[updateView] DIED index, hero:', i, hero);
+                    //console.log('[updateView] DIED index, hero:', i, hero);
                     if (i === 0) { updatePanels(); }
-                    world.DestroyBody(hero.body);
+                    Gry.World.DestroyBody(hero.body);
                     heroes[i] = null;
                 }
             }
@@ -479,15 +449,15 @@ Gry.Phx = (function() {
                 var fighter = fighters[i];
                 if (fighter === null) continue;
                 if (fighter.HP > 0) {
-                    updateUnit(fighter);
+                    fighter.updateMapPosDim();
                 } else {
                     //console.log('[updateView] DIED index, fighter:', i, fighter);
-                    world.DestroyBody(fighter.body);
+                    Gry.World.DestroyBody(fighter.body);
                     fighters[i] = null;
                 }
             }
 
-            //  Draw flags
+            //  Draw orbs
             canvasCtx.lineWidth = 2;
             for (i = 0; i < nHeroes; ++i) {
                 var hero = heroes[i];
@@ -495,14 +465,16 @@ Gry.Phx = (function() {
                 canvasCtx.fillStyle = scaledTeamColor(hero.team, 1);
                 canvasCtx.strokeStyle = scaledTeamColor(hero.team, 1);
 
-                for (var flagName in hero.flags) {
-                    var flagTarget = hero.flags[flagName];
-                    if (flagTarget !== null && typeof flag[flagName].draw === 'function') {
-                        //  flagTarget{x,y} is stored in map coordinates
-                        //console.log('[updateView] DRAW / flagName, flagTarget:', flagName, flagTarget);
-                        flag[flagName].draw(flagTarget);
+                var orbs = hero.orbs;
+                for (var orbName in orbs) {
+                    var orb = orbs[orbName];
+                    if (orb !== null) {
+                        var orbDraw = Gry.OrbType[orbName].draw;
+                        if (typeof orb.draw !== 'function') { throw 'orb.draw is not a function'; }
+                        orb.draw(canvasCtx, orb.mapPos);
                     }
                 }
+
             }
 
             canvasCtx.lineWidth = 1;
@@ -554,28 +526,31 @@ Gry.Phx = (function() {
         var updatePanels = function() {
             var plrHeroIdx = 0;
             var plrHero = heroes[plrHeroIdx];
-            var $heroHP = $('#heroHP');
-            if (plrHero !== null) {
-                $heroHP.text(Math.ceil(plrHero.HP)+'/'+plrHero.maxHP);
-            }
-            else {
-                $heroHP.text('R.I.P.');
+            if (typeof plrHero !== 'undefined') {
+                var $heroHP = $('#heroHP');
+                if (plrHero !== null) {
+                    $heroHP.text(Math.ceil(plrHero.HP)+'/'+plrHero.maxHP);
+                }
+                else {
+                    $heroHP.text('R.I.P.');
+                }
             }
         };
 
         var tick = function() {
             //console.log('[tick]', heroes);
             applyForces();
-            world.Step(1/FPS, 10, 10);
+            Gry.World.Step(1/FPS, 10, 10);
             if (!isDebugMode) {
                 canvasCtx.clearRect(0, 0, viewWidth, viewHeight);
             } else {
-                world.DrawDebugData();
-                canvasCtx.globalAlpha = 0.5;
+                Gry.World.DrawDebugData();
+                canvasCtx.globalAlpha = 0.4;
             }
             updateView();
             updatePanels();
-            world.ClearForces();
+            Gry.World.ClearForces();
+            //console.log('[tick] END', heroes);
         };
 
         var listener = new b2ContactListener;
@@ -602,13 +577,12 @@ Gry.Phx = (function() {
                 }
             }
         };
-        world.SetContactListener(listener);
-
+        Gry.World.SetContactListener(listener);
 
         //console.log('[Phx] return G:', G);
         return G;
     };
 
-    return S;
+    return GPhx;
 
 })();

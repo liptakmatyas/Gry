@@ -29,13 +29,13 @@
         });
 
         var teamsInGame = [
-            { color: 'x00',    heroLevel: 1,   fighterMode: 'fight' }
+            { color: 'x00',    heroLevel: 1,   fighterMode: 'shield' }
         ,   { color: '0x0',    heroLevel: 1,   fighterMode: 'fight' }
-        ,   { color: '00x',    heroLevel: 1,   fighterMode: 'fight' }
+        ,   { color: '00x',    heroLevel: 1,   fighterMode: 'shield' }
         ];
 
         var i, n = teamsInGame.length;
-        var nFighters = 50;
+        var nFighters = 20;
         for (i = 0; i < n; ++i) {
             var team = teamsInGame[i];
             var maxHP = team.heroLevel*100;

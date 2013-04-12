@@ -25,6 +25,7 @@ var b2FixtureDef = Box2D.Dynamics.b2FixtureDef;
 var b2Fixture = Box2D.Dynamics.b2Fixture;
 var b2World = Box2D.Dynamics.b2World;
 var b2PolygonShape = Box2D.Collision.Shapes.b2PolygonShape;
+var b2CircleShape = Box2D.Collision.Shapes.b2CircleShape;
 var b2DebugDraw = Box2D.Dynamics.b2DebugDraw;
 var b2MouseJointDef = Box2D.Dynamics.Joints.b2MouseJointDef;
 var b2ContactListener = Box2D.Dynamics.b2ContactListener;
