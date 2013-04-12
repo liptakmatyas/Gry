@@ -277,90 +277,39 @@ Gry.Phx = (function() {
             return fp;
         };
 
-        //  TODO    Generalize forces
-        //  XXX     How does all this, below, fit with collision detection?
-        //
-        //  Current hack:
-        //  -   hero ---> flag: flag[flagName].force(b,ap)
-        //  -   hero <--> hero: hard-coded; (C,ap)
-        //  -   fighter ---> fighter: fighterModes[fighterMode].toFighter(fa,fb)
-        //  -   fighter ---> hero: fighterModes[fighterMode].toHero(fa,hb)
-
         //  XXX hero-specific forces?
         //  -   hero.flags[flagId][unitType][fidx]()
         //  -   hero.units[unitType][fidx]()
         //  -   hero.hero[heroName][fidx]()
         //  XXX global forces
         //  XXX team specific forces
-        //  XXX unit type specific forces (e.g. flags, fighterMode)
-
-        //  User data for all entities:
-        //
-        //  var udWall = {
-        //      t: 'wall'                   //  fixed; XXX wall types ???
-        //  };
-        //
-        //  var udHero = {
-        //      t: 'hero',                  //  fixed
-        //      n: "heroName",              //  user-defined, but *UNIQUE*, and not a "system type"
-        //      i: unitIdx                  //  unit index in units[udUnit.t][i] (instead of fighters[])
-        //  };
-        //
-        //  var udUnit = {
-        //      t: "unitType",              //  fighter
-        //      i: unitIdx                  //  unit index in units[udUnit.t][i] (instead of fighters[])
-        //  };
-
-        //  ?   Loop through bodies, check type (.t)
-        //  ?   hero ---> flag: flag[flagName].force(b,ap)
-        //  -   hero <--> hero: hard-coded; (C,ap)
-        //  -   fighter ---> fighter: fighterModes[fighterMode].toFighter(fa,fb)
-        //  -   fighter ---> hero: fighterModes[fighterMode].toHero(fa,hb)
-
-        //  Assuming unit!
-        //  Load full unit objects
-        //      var thisUnit = units[thisUd.t][thisUd.i];
-        //      var thatUnit = units[thatUd.t][thatUd.i];
-
-        //  forcePack{bA,bB,pA,pB,dx,dy,R2}
-        //      var forcePack = createForcePack(thisUnit, thatUnit); // TODO Formerly known as createForcePack()
-
-        //  force[][][fidx](uA,uB,ap) is a 3D array of force functions
-        //  -   A force function should calculate the size of the force vector, and apply it (sym/asym)
-        //  -   fcidx is the force chain index => order of application of forces
-        //  ?   How could this be used for shields, extra hit, remote weapons, etc?
-        //
-        //      var ForceChain = force[thisUnit.type][thatUnit.type];
-        //      var ForceFunc = ForceChain[fidx]; // for each fidx in ForceChain
-        //      var F = ForceFunc(thisUnit, thatUnit, forcePack);
 
         var activeForces = function(fp) {
-            //console.log('[activeForces] fp:', fp);
-            if (fp.tA === 'fighter') {
-                var fm = Gry.FighterMode[fp.eA.fighterMode];
-                if (typeof fm !== 'object') return;
-                if (fp.tB === 'fighter') {
-                    return (fp.eA.team === fp.eB.team) ? fm.toOwnFighter : fm.toEnemyFighter;
+            var TYPE_SPECIFIC_FORCES = {
+                'hero': {
+                    'hero':     function(fp) { return function(fp) { return { sym: 'a', size: -2/fp.R2 }; }; },
+                    'orb':      function(fp) { return Gry.OrbType[fp.eB.name].force; }
+                },
+                'fighter': {
+                    'fighter':  function(fp) { return Gry.FighterMode[fp.eA.fighterMode].toFighter; },
+                    'hero':     function(fp) { return Gry.FighterMode[fp.eA.fighterMode].toHero; }
                 }
-                else if (fp.tB === 'hero') {
-                    return (fp.eA.team === fp.eB.team) ? fm.toOwnHero : fm.toEnemyHero;
-                }
-            }
-            else if (fp.tA === 'hero') {
-                if (fp.tB === 'orb') {
-                    return Gry.OrbType[fp.eB.name].force;
-                }
-                else if (fp.tB === 'hero') {
-                    return function(fp) { return { sym: 'ab', size: -2/fp.R2 }; };
-                }
-            }
+            };
+
+            var forceSetA = TYPE_SPECIFIC_FORCES[fp.tA];
+            if (typeof forceSetA !== 'object' || forceSetA === null) return null;
+            var forceSetB = forceSetA[fp.tB];
+            if (typeof forceSetB !== 'function') return null;
+            var forces = forceSetB(fp);
+            return ((typeof forces === 'function') ? forces : null);
         };
 
         var applyForcesFrom = function(entityA, entityB) {
             var fp = createForcePack(entityA, entityB);
             var forceFunc = activeForces(fp);
             if (typeof forceFunc !== 'function') return;
-            applyForce(forceFunc(fp), fp);
+            var F = forceFunc(fp);
+            if (F !== null) applyForce(F, fp);
         };
 
         var applyForces = function() {
@@ -377,7 +326,8 @@ Gry.Phx = (function() {
                     if (thatOrb === null) continue;
                     applyForcesFrom(thisHero, thatOrb);
                 }
-                for (j = i+1; j < nHeroes; ++j) {
+                for (j = 0; j < nHeroes; ++j) {
+                    if (j === i) continue;
                     var thatHero = heroes[j];
                     if (thatHero === null) continue;
                     applyForcesFrom(thisHero, thatHero);

@@ -1,10 +1,5 @@
 (function($) {
 
-    //  TODO    This is hardcoded for now, but should be set, as the parameter
-    //          for the mode, from the GUI.
-    //          -   Maybe using '.toHero().shieldRadius'?
-    var shieldRadius = 1;
-
     Gry.UnitType.FIGHTER = 'fighter';
 
     Gry.Fighter = Gry.Unit.extend({
@@ -45,7 +40,7 @@
     //
     //  All such functions have the same signature:
     //
-    //  -   .toEntity(fp) -> {sym, size}
+    //  -   .toEntity(fp) -> null / {sym, size}
     //      -   fp{bA,bB,pA,pB,dx,dy,R2}
     //      <-  .sym: force symmetry
     //          -   'a': only entity A is affected
@@ -57,24 +52,21 @@
     //          -   .size > 0: attract
     //
 
+    //  TODO    This is hardcoded for now, but should be set, as the parameter
+    //          for the mode, from the GUI.
+    //          -   Maybe using '.toHero().shieldRadius'?
+    var shieldRadius = 1;
+
     Gry.FighterMode = {
 
-        //  Own hero: attracts with radius
-        //  Enemy fighters: attract
         'shield': {
-            toOwnHero:      function(fp) { return { sym: 'a', size: 8*(fp.R2-shieldRadius*fp.eB.level), }; },
-            toEnemyHero:    null,
-            toOwnFighter:   null,
-            toEnemyFighter: function(fp) { return { sym: 'a', size: 0.5/fp.R2 }; }
+            toHero:     function(fp) { return ((fp.eA.team === fp.eB.team) ? { sym: 'a', size: 8*(fp.R2-shieldRadius*fp.eB.level) } : null); },
+            toFighter:  function(fp) { return ((fp.eA.team === fp.eB.team) ? null : { sym: 'a', size: 0.5/fp.R2 }); }
         },
 
-        //  Enemy heroes: attract
-        //  Enemy fighters: attract
         'fight': {
-            toOwnHero:      null,
-            toEnemyHero:    function(fp) { return { sym: 'a', size: 4/fp.R2 }; },
-            toOwnFighter:   null,
-            toEnemyFighter: function(fp) { return { sym: 'a', size: 1/fp.R2 }; }
+            toHero:     function(fp) { return ((fp.eA.team !== fp.eB.team) ? { sym: 'a', size: 4/fp.R2 } : null); },
+            toFighter:  function(fp) { return ((fp.eA.team !== fp.eB.team) ? { sym: 'a', size: 1/fp.R2 } : null); }
         }
     };
 
