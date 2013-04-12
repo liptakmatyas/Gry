@@ -33,10 +33,8 @@
             this.symbol = stat.symbol;
         },
 
-        AddOrb: function(orbStat) {
+        AddOrb: function(orb) {
             //console.log('[Hero.AddOrb] this, orbStat:', this, orbStat);
-            var orb = new Gry.Orb(this.GSys, orbStat);
-            //console.log('[Hero.AddOrb] NEW orb:', orb);
             this.orbs.push(orb);
             return this;
         },

@@ -89,6 +89,16 @@ Gry.Phx = (function() {
                 return this;
             },
 
+            //  Scale length to world size
+            scaleLen2W: function(l) {
+                return l/Gry.worldScale;
+            },
+
+            //  Scale length to map size
+            scaleLen2M: function(l) {
+                return Math.floor(l*Gry.worldScale);
+            },
+
             //  Scale dimension d{w,h} to world dimensions
             scaleDim2W: function(d) {
                 return { w: d.w/Gry.worldScale, h: d.h/Gry.worldScale };
@@ -292,7 +302,7 @@ Gry.Phx = (function() {
             var TYPE_SPECIFIC_FORCES = {
                 'hero': {
                     'hero':     function(fp) { return function(fp) { return { sym: 'a', size: -2/fp.R2 }; }; },
-                    'orb':      function(fp) { return Gry.OrbType[fp.eB.type].force; }
+                    'orb':      function(fp) { return fp.eB.force.bind(fp.eB); }
                 },
                 'fighter': {
                     'fighter':  function(fp) { return Gry.FighterMode[fp.eA.fighterMode].toFighter; },
@@ -356,19 +366,6 @@ Gry.Phx = (function() {
             }
         };
 
-        var scaledTeamColor = function(team, scale) {
-            //console.log('[scaledTeamColor] team, scale:', team, scale);
-            var colorValue = Math.floor(255*scale);
-            colorValue = colorValue < 0 ? 0
-                       : colorValue > 255 ? 255
-                       : colorValue;
-            var hexColorValue = (colorValue < 16 ? '0' : '') + colorValue.toString(16);
-            //console.log('[scaledTeamColor] colorValue, hexColorValue:', colorValue, hexColorValue);
-            var c = '#'+team.replace(/0/g, '00').replace(/x/g, hexColorValue);
-            //console.log('[scaledTeamColor] c:', c);
-            return c;
-        };
-
         var updateView = function() {
             var nHeroes = heroes.length;
             var nFighters = fighters.length;
@@ -407,15 +404,14 @@ Gry.Phx = (function() {
             for (i = 0; i < nHeroes; ++i) {
                 var hero = heroes[i];
                 if (hero === null) continue;
-                canvasCtx.fillStyle = scaledTeamColor(hero.team, 1);
-                canvasCtx.strokeStyle = scaledTeamColor(hero.team, 1);
+                canvasCtx.fillStyle = Gry.scaledTeamColor(hero.team, 1);
+                canvasCtx.strokeStyle = Gry.scaledTeamColor(hero.team, 1);
 
                 var orbs = hero.orbs;
                 var nOrbs = orbs.length;
                 for (j = 0; j < nOrbs; ++j) {
                     var orb = orbs[j];
                     if (orb !== null) {
-                        var orbDraw = Gry.OrbType[orb.type].draw;
                         if (typeof orb.draw !== 'function') { throw 'orb.draw is not a function'; }
                         orb.draw(canvasCtx, orb.mapPos);
                     }
@@ -438,8 +434,8 @@ Gry.Phx = (function() {
                 var health = hero.HP/hero.maxHP;
 
                 canvasCtx.font = (2*box.hH)+'pt sans-serif';
-                canvasCtx.fillStyle = scaledTeamColor(hero.team, health);
-                canvasCtx.strokeStyle = scaledTeamColor(hero.team, 1);
+                canvasCtx.fillStyle = Gry.scaledTeamColor(hero.team, health);
+                canvasCtx.strokeStyle = Gry.scaledTeamColor(hero.team, 1);
                 canvasCtx.save();
                 canvasCtx.translate(cx, cy);
                 canvasCtx.rotate(box.a);
@@ -461,8 +457,8 @@ Gry.Phx = (function() {
                 canvasCtx.save();
                 canvasCtx.translate(cx, cy);
                 canvasCtx.rotate(box.a);
-                canvasCtx.fillStyle = scaledTeamColor(fighter.team, health);
-                canvasCtx.strokeStyle = scaledTeamColor(fighter.team, 1);
+                canvasCtx.fillStyle = Gry.scaledTeamColor(fighter.team, health);
+                canvasCtx.strokeStyle = Gry.scaledTeamColor(fighter.team, 1);
                 canvasCtx.fillRect(-box.hW, -box.hH, 2*box.hW, 2*box.hH);
                 canvasCtx.strokeRect(-box.hW, -box.hH, 2*box.hW, 2*box.hH);
                 canvasCtx.restore();

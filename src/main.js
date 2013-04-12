@@ -28,7 +28,7 @@
             isDebugMode: false
         });
 
-        var nFighters = 50;
+        var nFighters = 30;
         var teamsInGame = [
             { color: 'x00',    heroLevel: 1,   fighterMode: 'shield' }
         ,   { color: '0x0',    heroLevel: 1,   fighterMode: 'shield' }
@@ -49,13 +49,27 @@
                 mapPos: Gry.rndPos(G.MapDim())
             });
 
+            /*
+            var orb = new Gry.AvoidOrb(G, { id: 'magnet', team: hero.team, radius: 10, range: 90, type: 'avoid', mapPos: { x: hero.mapPos.x-90, y: hero.mapPos.y } });
+            hero.AddOrb(orb);
+            */
+
             var jumpy = function(hero, orbType) {
                 (function(hero, orbId, orbType) {
                     var on = false;
                     var intv = 1000;
                     var jumpy = function(hero, orbId, orbType) {
-                        if (on) { hero.RemoveOrbId(orbId); on = false; }
-                        else { hero.AddOrb({ id: orbId, type: orbType, mapPos: Gry.rndPos(G.MapDim()) }); on = true; }
+                        if (on) {
+                            hero.RemoveOrbId(orbId);
+                            on = false;
+                        }
+                        else {
+                            var orb = (orbType === 'avoid'      ? new Gry.AvoidOrb(G, { id: orbId, team: hero.team, radius: 10, range: 90, type: orbType, mapPos: Gry.rndPos(G.MapDim()) })
+                                    : (orbType === 'moveTo'     ? new Gry.MoveToOrb(G, { id: orbId, team: hero.team, radius: 10, range: 30, type: orbType, mapPos: Gry.rndPos(G.MapDim()) })
+                                    : null));
+                            hero.AddOrb(orb);
+                            on = true;
+                        }
                         if (hero.HP > 0) { setTimeout(function() { jumpy(hero, orbId, orbType) }, intv); }
                     };
                     setTimeout(function() { jumpy(hero, orbId, orbType) }, intv);
@@ -66,6 +80,8 @@
             (function(hero) {
                 setTimeout(function() { jumpy(hero, 'avoid'); }, 500);
             }(hero));
+            /*
+            */
 
             for (j = 0; j < nFighters; ++j) {
                 var maxHP = 50;

@@ -12,6 +12,21 @@
             return p;
         },
 
+        scaledTeamColor: function(team, scale, alpha) {
+            //console.log('[scaledTeamColor] team, scale:', team, scale);
+            if (typeof alpha !== 'number') alpha = 1;
+            var colorValue = Math.floor(255*scale);
+            colorValue = colorValue < 0 ? 0
+                       : colorValue > 255 ? 255
+                       : colorValue;
+            //var hexColorValue = (colorValue < 16 ? '0' : '') + colorValue.toString(16);
+            //console.log('[scaledTeamColor] colorValue, hexColorValue:', colorValue, hexColorValue);
+            //var c = '#'+team.replace(/0/g, '00').replace(/x/g, hexColorValue);
+            //console.log('[scaledTeamColor] c:', c);
+            var c = 'rgba('+team.replace(/0/g, '0,').replace(/x/g, colorValue+',')+alpha+')';
+            return c;
+        }
+
     };
 
 }());

@@ -43,47 +43,24 @@
     //      -   pos{x,y}: position of center of orb
     //
 
-    Gry.OrbType = {
-        'avoid': {
-            force: function(fp) { return { sym: 'a', size: -400/fp.R2 }; },
-
-            draw: function(canvasCtx, pos) {
-                //console.log('[ORB.avoid.draw] pos:', pos);
-                canvasCtx.beginPath();
-                canvasCtx.arc(pos.x, pos.y, 10, 0, 2*Math.PI, false);
-                canvasCtx.stroke();
-            }
-        },
-
-        'moveTo': {
-            force: function(fp) { return { sym: 'a', size: 0.8*fp.R2 }; },
-
-            draw: function(canvasCtx, pos) {
-                //console.log('[ORB.moveTo.draw] pos:', pos);
-                canvasCtx.beginPath();
-                canvasCtx.arc(pos.x, pos.y, 10, 0, 2*Math.PI, false);
-                canvasCtx.fill();
-            }
-        }
-    };
-
-
     Gry.Orb = Gry.Entity.extend({
         init: function(GSys, orb) {
             //console.log('[Orb.New] INCOMING orb:', orb);
 
+            var radiusW = GSys.scaleLen2W(orb.radius);
             this._super(GSys, {
                 entityType: Gry.EntityType.ORB,
-                body: orbBody(GSys.scalePos2W(orb.mapPos), 10, { orbType: orb.orbType, orbIdx: orb.orbIdx }),
+                body: orb.body || orbBody(GSys.scalePos2W(orb.mapPos), radiusW, { orbType: orb.orbType, orbIdx: orb.orbIdx }),
                 mapPos: { x: orb.mapPos.x, y: orb.mapPos.y },
-                mapDim: { w: 20, h: 20 }
+                mapDim: { w: 2*orb.radius, h: 2*orb.radius }
             });
 
             this.id = orb.id;
+            this.team = orb.team;
             this.type = orb.type;
             this.orbIdx = orb.orbIdx;
-            this.radius = 10;
-            this.draw = Gry.OrbType[orb.type].draw;
+            this.radiusM = orb.radius;
+            this.radiusW = radiusW;
         }
     });
 
