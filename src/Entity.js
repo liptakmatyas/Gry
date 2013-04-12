@@ -1,9 +1,20 @@
 (function() {
 
-    Gry.Entity = Class.extend({
-        Type: {},
-        Category: {},
+    Gry.EntityType = {
+        WALL:   'wall',
+        UNIT:   'unit',
+        HERO:   'hero',
+        ORB:    'orb'
+    };
 
+    Gry.EntityCategory = {
+        WALL:   0x0001,
+        UNIT:   0x0002,
+        HERO:   0x0004,
+        ORB:    0x0008
+    };
+
+    Gry.Entity = Class.extend({
         init: function(GSys, e) {
             if (typeof e !== 'object')              { throw 'No entity info'; }
             if (typeof e.entityType !== 'string')   { throw 'No entity type'; }
@@ -23,20 +34,6 @@
         }
 
     });
-
-    Gry.Entity.Type = {
-        WALL:   'wall',
-        UNIT:   'unit',
-        HERO:   'hero',
-        ORB:    'orb'
-    };
-
-    Gry.Entity.Category = {
-        WALL:   0x0001,
-        UNIT:   0x0002,
-        HERO:   0x0004,
-        ORB:    0x0008
-    };
 
 })();
 

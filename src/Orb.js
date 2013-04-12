@@ -16,7 +16,7 @@
 
         fd.shape = new b2CircleShape(radius);
 
-        fd.filter.categoryBits  = Gry.Entity.Category.ORB;
+        fd.filter.categoryBits  = Gry.EntityCategory.ORB;
         fd.filter.maskBits      = 0;
 
         return fd;
@@ -81,7 +81,7 @@
             //console.log('[Orb.New] INCOMING orb:', orb);
 
             this._super(GSys, {
-                entityType: 'orb',
+                entityType: Gry.EntityType.ORB,
                 body: orbBody(GSys.scalePos2W(orb.mapPos), 10, { orbType: orb.orbType, orbIdx: orb.orbIdx }),
                 mapPos: { x: orb.mapPos.x, y: orb.mapPos.y },
                 mapDim: { w: 20, h: 20 }

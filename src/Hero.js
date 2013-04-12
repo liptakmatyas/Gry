@@ -1,5 +1,7 @@
 (function($) {
 
+    Gry.UnitType.HERO = 'hero';
+
     //  Add .orbIdx to all elements in the orbs array, accoding to their index
     var indexOrbList = function(orbs) {
         var n = orbs.length;
@@ -16,7 +18,7 @@
             var size = 20*stat.level;
 
             this._super(GSys, {
-                unitType: 'hero',
+                unitType: Gry.UnitType.HERO,
                 unitIdx: stat.unitIdx,
 
                 team: stat.team,

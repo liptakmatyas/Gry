@@ -5,16 +5,14 @@
     //          -   Maybe using '.toHero().shieldRadius'?
     var shieldRadius = 1;
 
-    Gry.Unit.Type.FIGHTER = 'fighter';
+    Gry.UnitType.FIGHTER = 'fighter';
 
     Gry.Fighter = Gry.Unit.extend({
-        MODE: {},
-
         init: function(GSys, stat) {
             //console.log('[Gry.Fighter] stat:', stat);
             this._super(GSys, {
-                entityType: Gry.Entity.Type.UNIT,
-                unitType: Gry.Unit.Type.FIGHTER,
+                entityType: Gry.EntityType.UNIT,
+                unitType: Gry.UnitType.FIGHTER,
                 unitIdx: stat.unitIdx,
 
                 team: stat.team,
@@ -59,7 +57,7 @@
     //          -   .size > 0: attract
     //
 
-    Gry.Fighter.MODE = {
+    Gry.FighterMode = {
 
         //  Own hero: attracts with radius
         //  Enemy fighters: attract

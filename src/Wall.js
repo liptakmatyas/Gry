@@ -36,10 +36,11 @@
         init: function(GSys, wall) {
             //console.log('[Wall.init] INCOMING wall:', wall);
             this._super(GSys, {
-                entityType: 'wall',
+                entityType: Gry.EntityType.WALL,
                 body: wallBody(
                     GSys.scalePos2W(wall.mapPos),
                     GSys.scaleDim2W({ w: wall.mapDim.w/2, h: wall.mapDim.h/2 }),
+                    //  FIXME   unitType is just a hack here for collision detection / damage
                     { unitType: 'wall', wallIdx: wall.wallIdx }),
                 mapPos: { x: wall.mapPos.x, y: wall.mapPos.y },
                 mapDim: { w: wall.mapDim.w, h: wall.mapDim.h }

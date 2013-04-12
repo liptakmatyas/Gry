@@ -1,5 +1,8 @@
 (function($) {
 
+    //  The unit type classes register themselves in this object
+    Gry.UnitType = {};
+
     Gry.Unit = Gry.Entity.extend({
         init: function(GSys, unit) {
             //console.log('[Unit.init] INCOMING unit:', unit);
@@ -62,8 +65,6 @@
         }
 
     });
-
-    Gry.Unit.Type = {};
 
 }(jQuery));
 

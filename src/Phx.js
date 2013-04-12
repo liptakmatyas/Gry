@@ -370,7 +370,7 @@ Gry.Phx = (function() {
             for (i = 0; i < nFighters; ++i) {
                 var thisFighter = fighters[i];
                 if (thisFighter === null) continue;
-                var fm = Gry.Fighter.MODE[thisFighter.fighterMode];
+                var fm = Gry.FighterMode[thisFighter.fighterMode];
                 //console.log('[applyForces] i, thisFighter, fm:', i, thisFighter, fm);
 
                 for (j = 0; j < nHeroes; ++j) {
