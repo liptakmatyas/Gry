@@ -135,6 +135,7 @@ div.dualLabel div {
     top: 5px;
     width: 640px;
     height: 600px;
+    cursor: none;
 }
 
 #controlPanel {

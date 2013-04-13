@@ -44,6 +44,8 @@ Gry.Phx = (function() {
         var $canvas = null;
         var canvasCtx = null;
 
+        var mouse = null;
+
         var viewDimW = null;
 
         var FPS = 30;
@@ -145,6 +147,15 @@ Gry.Phx = (function() {
         });
         canvasCtx = $canvas[0].getContext("2d");
         $viewDiv.append($canvas);
+
+        /*
+         *  Mouse
+         */
+
+        mouse = new Gry.Mouse();
+        $canvas.on('mouseenter', mouse.onEnterMap.bind(mouse));
+        $canvas.on('mouseleave', mouse.onLeaveMap.bind(mouse));
+        $canvas.on('mousemove', mouse.onMoveOverMap.bind(mouse));
 
         /*
          *  Setup Box2D
@@ -429,6 +440,8 @@ Gry.Phx = (function() {
                 canvasCtx.strokeRect(-box.hW, -box.hH, 2*box.hW, 2*box.hH);
                 canvasCtx.restore();
             }
+
+            if (mouse.overMap) mouse.drawCursor(canvasCtx);
         };
 
         var updatePanels = function() {
