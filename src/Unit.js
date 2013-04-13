@@ -3,6 +3,41 @@
     //  The unit type classes register themselves in this object
     Gry.UnitType = {};
 
+    var boxBodyDef = function(posW, bType) {
+        var bd = new b2BodyDef();
+        bd.type = bType;
+        bd.position.Set(posW.x, posW.y);
+        //  FIXME   Magic numbers!
+        bd.linearDamping = 5;
+        bd.angularDamping = 2;
+        return bd;
+    };
+
+    var boxFixtDef = function(hdimW) {
+        var fd = new b2FixtureDef();
+        fd.density      = 1.0;
+        fd.friction     = 1.0;
+        fd.restitution  = 0.00001;
+
+        fd.shape = new b2PolygonShape();
+        fd.shape.SetAsBox(hdimW.w, hdimW.h);
+
+        fd.filter.categoryBits   = Gry.EntityCategory.UNIT;
+        fd.filter.maskBits       = (typeof maskBits === 'number' ? maskBits : 0xFFFF);
+
+        return fd;
+    };
+
+    //  Create a default box
+    //  - at world position posW{x,y}
+    //  - with half world scale size hdimW{w,h}
+    var boxBody = function(posW, hdimW) {
+        var b = Gry.World.CreateBody(boxBodyDef(posW, b2Body.b2_dynamicBody));
+        var f = boxFixtDef(hdimW);
+        b.CreateFixture(f);
+        return b;
+    };
+
     Gry.Unit = Gry.Entity.extend({
         init: function(GSys, unit) {
             //console.log('[Unit.init] INCOMING unit:', unit);
@@ -17,10 +52,9 @@
 
             //  Body can optionally be overridden by the caller
             if (typeof unit.body !== 'object' || unit.body === null) {
-                unit.body = GSys.boxBody(
+                unit.body = boxBody(
                     GSys.scalePos2W(unit.mapPos),
-                    GSys.scaleDim2W({ w: unit.mapDim.w/2, h: unit.mapDim.h/2 }),
-                    { unitType: unit.unitType, unitIdx: unit.unitIdx });
+                    GSys.scaleDim2W({ w: unit.mapDim.w/2, h: unit.mapDim.h/2 }));
             }
 
             this._super(GSys, {

@@ -15,6 +15,9 @@
 
         fd.shape = new b2PolygonShape();
         fd.shape.SetAsBox(hdimW.w, hdimW.h);
+
+        fd.filter.categoryBits  = Gry.EntityCategory.WALL;
+
         return fd;
     };
 

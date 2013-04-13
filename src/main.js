@@ -64,8 +64,8 @@
                             on = false;
                         }
                         else {
-                            var orb = (orbType === 'avoid'      ? new Gry.AvoidOrb(G, { id: orbId, team: hero.team, radius: 10, range: 90, type: orbType, mapPos: Gry.rndPos(G.MapDim()) })
-                                    : (orbType === 'moveTo'     ? new Gry.MoveToOrb(G, { id: orbId, team: hero.team, radius: 10, range: 30, type: orbType, mapPos: Gry.rndPos(G.MapDim()) })
+                            var orb = (orbType === 'avoid'      ? new Gry.AvoidOrb(G, { id: orbId, team: hero.team, radius: 10, range: 100*Math.random(), type: orbType, mapPos: Gry.rndPos(G.MapDim()) })
+                                    : (orbType === 'moveTo'     ? new Gry.MoveToOrb(G, { id: orbId, team: hero.team, radius: 10, range: 50*Math.random(), type: orbType, mapPos: Gry.rndPos(G.MapDim()) })
                                     : null));
                             hero.AddOrb(orb);
                             on = true;

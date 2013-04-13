@@ -31,6 +31,12 @@
             this.level = stat.level;
             this.orbs = [];
             this.symbol = stat.symbol;
+
+            //  Override collision category
+            var fixt = this.body.GetFixtureList();
+            var filter = fixt.GetFilterData();
+            filter.categoryBits = Gry.EntityCategory.HERO;
+            fixt.SetFilterData(filter);
         },
 
         AddOrb: function(orb) {

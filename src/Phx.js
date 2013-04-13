@@ -119,36 +119,6 @@ Gry.Phx = (function() {
                 return { x: Math.floor(p.x*Gry.worldScale), y: Math.floor(p.y*Gry.worldScale) };
             },
 
-            boxBodyDef: function(posW, bType) {
-                var bd = new b2BodyDef();
-                bd.type = bType;
-                bd.position.Set(posW.x, posW.y);
-                //  FIXME   Magic numbers!
-                bd.linearDamping = 5;
-                bd.angularDamping = 2;
-                return bd;
-            },
-
-            boxFixtDef: function(hdimW) {
-                var fd = new b2FixtureDef();
-                fd.density      = 1.0;
-                fd.friction     = 1.0;
-                fd.restitution  = 0.00001;
-
-                fd.shape = new b2PolygonShape();
-                fd.shape.SetAsBox(hdimW.w, hdimW.h);
-                return fd;
-            },
-
-            //  Create a default box
-            //  - at world position posW{x,y}
-            //  - with half world scale size hdimW{w,h}
-            boxBody: function(posW, hdimW) {
-                var b = Gry.World.CreateBody(this.boxBodyDef(posW, b2Body.b2_dynamicBody));
-                b.CreateFixture(this.boxFixtDef(hdimW));
-                return b;
-            },
-
         };
 
         /*
