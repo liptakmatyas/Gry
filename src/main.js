@@ -49,11 +49,20 @@
                 mapPos: Gry.rndPos(G.MapDim())
             });
 
-            /*
-            var orb = new Gry.AvoidOrb(G, { id: 'dangerZone', team: hero.team, radius: 10, range: 90, type: 'avoid', mapPos: { x: hero.mapPos.x-90, y: hero.mapPos.y } });
+            var orb = new Gry.PathOrb(G, {
+                id:     'track',
+                type:   'path',
+                team:   hero.team,
+                radius: 10,
+                range:  30,
+                mapPos: Gry.rndPos(G.MapDim()),
+                tail:   [ Gry.rndPos(G.MapDim()), Gry.rndPos(G.MapDim()), Gry.rndPos(G.MapDim()) ]
+            });
             hero.AddOrb(orb);
+            /*
             */
 
+            /*
             var jumpy = function(hero, orbType) {
                 (function(hero, orbId, orbType) {
                     var on = false;
@@ -80,7 +89,6 @@
             (function(hero) {
                 setTimeout(function() { jumpy(hero, 'avoid'); }, 500);
             }(hero));
-            /*
             */
 
             for (j = 0; j < nFighters; ++j) {

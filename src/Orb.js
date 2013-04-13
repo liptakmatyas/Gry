@@ -25,7 +25,7 @@
         var posW = GSys.scalePos2W(orb.mapPos);
         var b = Gry.World.CreateBody(orbBodyDef(posW, b2Body.b2_staticBody));
 
-        var radiusW = GSys.scalePos2W(orb.radius);
+        var radiusW = GSys.scaleLen2W(orb.radius);
         b.CreateFixture(orbFixtDef(radiusW));
 
         return b;
@@ -41,6 +41,7 @@
                 mapDim: { w: 2*orb.radius, h: 2*orb.radius }
             });
 
+            this.hero = orb.hero;
             this.id = orb.id;
             this.team = orb.team;
             this.type = orb.type;

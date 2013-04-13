@@ -41,6 +41,7 @@
 
         AddOrb: function(orb) {
             //console.log('[Hero.AddOrb] this, orbStat:', this, orbStat);
+            orb.hero = this;
             this.orbs.push(orb);
             return this;
         },
@@ -51,7 +52,8 @@
             var n = orbs.length;
             for (var i = 0; i < n; ++i) {
                 if (orbs[i].id === orbId) {
-                    orbs.splice(i, 1);
+                    var orb = orbs.splice(i, 1)[0];
+                    Gry.World.DestroyBody(orb.body);
                     break;  //  The id should be unique...
                 }
             }

@@ -463,6 +463,28 @@ Gry.Phx = (function() {
 
         var listener = new b2ContactListener;
 
+        listener.BeginContact = function(contact) {
+            var fixtA = contact.GetFixtureA();
+            var fixtB = contact.GetFixtureB();
+
+            var isSA = fixtA.IsSensor();
+            var isSB = fixtB.IsSensor();
+            if (!(isSA ^ isSB)) return;
+
+            var orbFixt = isSA ? fixtA : fixtB;
+            var heroFixt = isSA ? fixtB : fixtA;
+            var orb = orbFixt.GetBody().GetUserData();
+            //  TODO    Use fixt.filter.groupIndex instead!
+            if (orb.hero === heroFixt.GetBody().GetUserData()) {
+                orb.jump = true;
+            }
+        };
+
+        /*
+        listener.EndContact = function(contact) {
+        };
+        */
+
         listener.PostSolve = function(contact, impulse) {
             //  The entities are attached as user data
             var eA = contact.GetFixtureA().GetBody().GetUserData();
