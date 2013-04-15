@@ -1,11 +1,11 @@
 (function($) {
 
     var setupLevel = function(G) {
-        var nFighters = 30;
+        var nFighters = 0;
         var teamsInGame = [
             { color: 'x00',    heroLevel: 1,   fighterMode: 'shield' }
-        ,   { color: '0x0',    heroLevel: 1,   fighterMode: 'shield' }
-        ,   { color: '00x',    heroLevel: 1,   fighterMode: 'shield' }
+        //,   { color: '0x0',    heroLevel: 1,   fighterMode: 'shield' }
+        //,   { color: '00x',    heroLevel: 1,   fighterMode: 'shield' }
         ];
 
         var i, n = teamsInGame.length;
@@ -22,6 +22,7 @@
                 mapPos: Gry.rndPos(G.MapDim())
             });
 
+            /*
             var orb = new Gry.PathOrb(G, {
                 id:     'track',
                 type:   'path',
@@ -32,7 +33,6 @@
                 tail:   [ Gry.rndPos(G.MapDim()), Gry.rndPos(G.MapDim()), Gry.rndPos(G.MapDim()) ]
             });
             hero.AddOrb(orb);
-            /*
             */
 
             /*

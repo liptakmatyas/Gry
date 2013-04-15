@@ -18,7 +18,8 @@
         setupCanvas: function(canvasId) {
             this.canvasId = canvasId;
 
-            this.$canvas = $('<canvas id="'+this.canvasId+'" width="'+this.viewWidth+'" height="'+this.viewHeight+'"></canvas>');
+            //  tabindex="0" is needed, so that the canvas can get focus and we can handle the keyboard events
+            this.$canvas = $('<canvas id="'+this.canvasId+'" width="'+this.viewWidth+'" height="'+this.viewHeight+'" tabindex="0"></canvas>');
             this.$canvas.css({
                 'position': 'absolute',
                 'left': '0',
@@ -28,10 +29,11 @@
                 'padding': '0',
                 'margin': '0',
                 'background-color': '#FFF',
+                'outline': 'none'
             });
             this.canvasCtx = this.$canvas[0].getContext("2d");
-
             this.$viewDiv.append(this.$canvas);
+            this.$canvas.focus();
 
             return this.$canvas;
         },

@@ -148,18 +148,26 @@ Gry.Phx = (function() {
 
         Gry.actman = new Gry.ActivityManager(Gry.mouse);
 
+        var bindKeyCode = function(keyCode, handler) {
+            var h = function(e) {
+                if (e.keyCode !== keyCode) return;
+                return handler(e);
+            };
+            Gry.gui.$canvas.on('keyup', h);
+        };
+
         Gry.actman.RegisterChain(
-            function(h) { Gry.gui.$avoidOrb.on('click', h); },
+            function(h) { Gry.gui.$avoidOrb.on('click', h); bindKeyCode(49, h); },
             new Gry.ActivityChain('set-AvoidOrb-target', [ new Gry.SetOrbTarget('avoid') ])
         );
 
         Gry.actman.RegisterChain(
-            function(h) { Gry.gui.$moveToOrb.on('click', h); },
+            function(h) { Gry.gui.$moveToOrb.on('click', h); bindKeyCode(50, h); },
             new Gry.ActivityChain('set-MoveToOrb-target', [ new Gry.SetOrbTarget('moveTo') ])
         );
 
         Gry.actman.RegisterChain(
-            function(h) { Gry.gui.$pathOrb.on('click', h); },
+            function(h) { Gry.gui.$pathOrb.on('click', h); bindKeyCode(51, h); },
             new Gry.ActivityChain('set-PathOrb-target', [ new Gry.SetOrbTarget('path'), new Gry.SetOrbTail(), new Gry.SetOrbTail(), new Gry.SetOrbTail() ])
         );
 
