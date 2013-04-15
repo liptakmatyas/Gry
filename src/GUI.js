@@ -3,8 +3,37 @@
     var GryFrag = Gry.Frag;
 
     Gry.GUI = Class.extend({
-        init: function() {
+        init: function(viewDivId) {
+            this.viewDivId = viewDivId;
+            this.$viewDiv = $('#'+viewDivId);
+            this.viewWidth = this.$viewDiv.width();
+            this.viewHeight = this.$viewDiv.height();
+
+            this.canvasId = null;
+            this.$canvas = null;
+
             this.$ctrlPanel = null;
+        },
+
+        setupCanvas: function(canvasId) {
+            this.canvasId = canvasId;
+
+            this.$canvas = $('<canvas id="'+this.canvasId+'" width="'+this.viewWidth+'" height="'+this.viewHeight+'"></canvas>');
+            this.$canvas.css({
+                'position': 'absolute',
+                'left': '0',
+                'top': '0',
+                'border': 'none',
+                'border-collapse': 'collapse',
+                'padding': '0',
+                'margin': '0',
+                'background-color': '#FFF',
+            });
+            this.canvasCtx = this.$canvas[0].getContext("2d");
+
+            this.$viewDiv.append(this.$canvas);
+
+            return this.$canvas;
         },
 
         setupControlPanelDOM: function() {
@@ -37,12 +66,12 @@
                             GryFrag.imgLabel('heroShield', 'shield', 999.99, 'Small') +
                         '</div>' +
                     '</div>' +
-                    '<div id="heroFlags">' +
-                        GryFrag.imgButton('avoidFlag', 'avoid') +
-                        GryFrag.imgButton('moveToFlag', 'moveto') +
-                        GryFrag.imgButton('attackFlag', 'attack') +
+                    '<div id="heroOrbs">' +
+                        GryFrag.imgButton('avoid', 'avoid') +
+                        GryFrag.imgButton('moveTo', 'moveto') +
+                        GryFrag.imgButton('path', 'path') +
                     '</div>'
-                //) +
+                ) +
 
                 /*
                 GryFrag.tab('swarmTab', 'swarm', 'SWARMS',
@@ -58,12 +87,12 @@
                         GryFrag.imgButton('orbiterCannonButton', 'orbiter-canon') +
                     '</div>'
                 ) +
+                */
 
                 GryFrag.tab('shopTab', 'shop', 'SHOP',
                     '<div id="shopBox">' +
                         GryFrag.shopItem(amount, itemName, itemDesc, goldCost, manaCost) +
                     '</div>'
-                */
                 );
 
             this.$ctrlPanel = $('#controlPanel').append(CPFrag);

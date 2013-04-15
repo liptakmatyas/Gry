@@ -24,7 +24,7 @@
             this.rangeW2 = this.rangeW * this.rangeW;
 
             this.jump = false;
-            this.tail = orbStat.tail;
+            this.tail = (typeof orbStat.tail === 'object' ? orbStat.tail : null);;
             
             this.body.CreateFixture(orbRangeFixtDef(this.rangeW));
         },
@@ -38,12 +38,19 @@
 
             //  Jump to next location if the hero reached this one,
             //  and we have path points left
+            //
+            //  FIXME   If the hero is in the intersection of the old and new orb's range,
+            //          no new BeginContact is generated (?) and thus the new orb will never be hit,
+            //          so the hero get stuck.
             if (this.jump) {
-                this.mapPos = this.tail.shift();
-                if (typeof this.mapPos === 'undefined') {
+                var nextPos = undefined;
+                if (this.tail) { nextPos = this.tail.shift(); }
+                if (typeof nextPos === 'undefined') {
                     this.hero.RemoveOrbId(this.id);
                     return;
                 }
+
+                this.mapPos = nextPos;
                 var newWorldPos = this.GSys.scalePos2W(this.mapPos);
                 var v = new b2Vec2(newWorldPos.x, newWorldPos.y);
                 this.body.SetPosition(v);
@@ -52,18 +59,20 @@
 
             //  Render tail
             var tail = this.tail;
-            var nTail = tail.length;
-            if (nTail) {
-                canvasCtx.save();
-                for (var i = 0; i < nTail; ++i) {
-                    var tPos = tail[i];
-                    var alpha = 0.5*((nTail-i)/nTail);
-                    canvasCtx.fillStyle = Gry.scaledTeamColor(this.team, 1, alpha);
-                    canvasCtx.beginPath();
-                    canvasCtx.arc(tPos.x, tPos.y, this.radiusM, 0, 2*Math.PI, false);
-                    canvasCtx.fill();
+            if (tail) {
+                var nTail = tail.length;
+                if (nTail) {
+                    canvasCtx.save();
+                    for (var i = 0; i < nTail; ++i) {
+                        var tPos = tail[i];
+                        var alpha = 0.5*((nTail-i)/nTail);
+                        canvasCtx.fillStyle = Gry.scaledTeamColor(this.team, 1, alpha);
+                        canvasCtx.beginPath();
+                        canvasCtx.arc(tPos.x, tPos.y, this.radiusM, 0, 2*Math.PI, false);
+                        canvasCtx.fill();
+                    }
+                    canvasCtx.restore();
                 }
-                canvasCtx.restore();
             }
 
             //  Render orb range

@@ -78,16 +78,17 @@
     };
 
     $(document).ready(function() {
-        var gui = new Gry.GUI();
-        gui.setupControlPanelDOM();
+        Gry.gui = new Gry.GUI('viewDiv');
+        Gry.gui.setupControlPanelDOM();
 
-        var G = Gry.Phx({
+        //  FIXME   Gry.Phx is not a Class yet...
+        Gry.phx = Gry.Phx({
             viewId: 'viewDiv',
             worldScale: 30,
             isDebugMode: false
         });
-        setupLevel(G);
-        G.StartLoop();
+        setupLevel(Gry.phx);
+        Gry.phx.StartLoop();
     });
 
 })(jQuery)

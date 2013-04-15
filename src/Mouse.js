@@ -4,7 +4,9 @@
         for (var crsName in cursorList) {
             var crs = cursorList[crsName];
             crs.img = new Image();
-            crs.img.onload = function() { crs.loaded = true; };
+            crs.img.onload = function(crs) {
+                return function() { crs.loaded = true; };
+            }(crs);
             crs.img.src = crs.src;
         }
     }
@@ -15,23 +17,22 @@
             this.y = 0;
             this.overMap = false;
 
-            //  TODO    Modes:
-            //          -   place{what(icon)} -> small 32x32 icon *outside* the upper-right corner
-            //          -   destroy
             this.mode = 'normal';
-
             this.cursor = {
-                normal: { src: 'img/cursor.normal.64x64.png', loaded: false, img: null }
+                normal:         { src: 'img/cursor.normal.64x64.png', loaded: false, img: null },
+                SetOrbTarget:   { src: 'img/cursor.place.64x64.png', loaded: false, img: null }
             };
 
             loadCursors(this.cursor);
         },
 
-        onEnterMap: function(e) { this.overMap = true; },
-        onLeaveMap: function(e) { this.overMap = false; },
-        onMoveOverMap: function(e) { this.x = e.offsetX; this.y = e.offsetY; },
+        onEnterMap: function(e) { this.overMap = true; return false; },
+        onLeaveMap: function(e) { this.overMap = false; return false; },
+        onMoveOverMap: function(e) { this.x = e.offsetX; this.y = e.offsetY; return false; },
 
-        drawCursor: function(ctx) {
+        setMode: function(mode) { this.mode = mode; },
+
+        DrawCursor: function(ctx) {
             var crs = this.cursor[this.mode];
             if (!crs.loaded) return;
             ctx.drawImage(crs.img, this.x-31, this.y-31);  //  64x64 cursors

@@ -44,17 +44,19 @@ Gry.Phx = (function() {
         var $canvas = null;
         var canvasCtx = null;
 
-        var mouse = null;
-
         var viewDimW = null;
+
+        var mouse = null;
 
         var FPS = 30;
         var frameTime = 1000/FPS;
         var isTicking = false;
         var ticker = null;
 
-        var heroes = [];
-        var fighters = [];
+        Gry.heroes = [];
+        Gry.fighters = [];
+        var heroes = Gry.heroes;
+        var fighters = Gry.fighters;
 
         var G = {
 
@@ -127,35 +129,38 @@ Gry.Phx = (function() {
          *  Setup DOM
          */
 
-        $viewDiv = $('#'+viewId);
-        viewWidth = $viewDiv.width();
-        viewHeight = $viewDiv.height();
-        viewWidthHalf = viewWidth/2;
-        viewHeightHalf = viewHeight/2;
-
-        $canvas = $('<canvas id="'+canvasId+'" width="'+viewWidth+'" height="'+viewHeight+'"></canvas>');
-        $canvas.css({
-            'position': 'absolute',
-            'left': '0',
-            'top': '0',
-            'border': 'none',
-            'border-collapse': 'collapse',
-            'padding': '0',
-            'margin': '0',
-            'background-color': '#FFF',
-            /*'opacity': ( isDebugMode ? '0.6' : '0.01' )*/
-        });
-        canvasCtx = $canvas[0].getContext("2d");
-        $viewDiv.append($canvas);
+        $canvas = Gry.gui.setupCanvas(canvasId);
+        canvasCtx = Gry.gui.canvasCtx;
 
         /*
-         *  Mouse
+         *  Mouse and GUI actions
          */
 
-        mouse = new Gry.Mouse();
-        $canvas.on('mouseenter', mouse.onEnterMap.bind(mouse));
-        $canvas.on('mouseleave', mouse.onLeaveMap.bind(mouse));
-        $canvas.on('mousemove', mouse.onMoveOverMap.bind(mouse));
+        Gry.mouse = new Gry.Mouse();
+        mouse = Gry.mouse;
+        $canvas.on('mouseenter',    mouse.onEnterMap.bind(mouse));
+        $canvas.on('mouseleave',    mouse.onLeaveMap.bind(mouse));
+        $canvas.on('mousemove',     mouse.onMoveOverMap.bind(mouse));
+
+        Gry.gui.$avoidOrb   = $('#avoid');
+        Gry.gui.$moveToOrb  = $('#moveTo');
+        Gry.gui.$pathOrb    = $('#path');
+
+        Gry.actman = new Gry.ActivityManager(Gry.mouse);
+        Gry.actman.RegisterChain(
+            function(h) { Gry.gui.$avoidOrb.on('click', h); },
+            new Gry.ActivityChain('set-AvoidOrb-target', [ new Gry.SetOrbTarget('avoid') ])
+        );
+        Gry.actman.RegisterChain(
+            function(h) { Gry.gui.$moveToOrb.on('click', h); },
+            new Gry.ActivityChain('set-MoveToOrb-target', [ new Gry.SetOrbTarget('moveTo') ])
+        );
+        /*
+        Gry.actman.RegisterChain(
+            function(h) { Gry.gui.$pathOrb.on('click', h); },
+            new Gry.ActivityChain('test-chain-1', [ new Gry.SetOrbTarget('moveTo'), new Gry.SetOrbTarget('avoid') ])
+        );
+        */
 
         /*
          *  Setup Box2D
@@ -164,8 +169,13 @@ Gry.Phx = (function() {
         Gry.World = new b2World(new b2Vec2(0, 0), true);
 
         var wallThickness = 30;
+        var viewWidth = Gry.gui.viewWidth;
+        var viewHeight = Gry.gui.viewHeight;
+        var viewWidthHalf = Math.floor(viewWidth/2);
+        var viewHeightHalf = Math.floor(viewHeight/2);
         var horizWallDim = { w: viewWidth, h: wallThickness };
         var vertWallDim = { w: wallThickness, h: viewHeight };
+
         new Gry.Wall(G, {
             wallIdx: 0,
             mapPos: { x: viewWidthHalf, y: viewHeight },
@@ -388,7 +398,7 @@ Gry.Phx = (function() {
                 var nOrbs = orbs.length;
                 for (j = 0; j < nOrbs; ++j) {
                     var orb = orbs[j];
-                    if (orb !== null) {
+                    if (typeof orb !== 'undefined' && orb !== null) {
                         if (typeof orb.draw !== 'function') { throw 'orb.draw is not a function'; }
                         orb.draw(canvasCtx, orb.mapPos);
                     }
@@ -441,7 +451,7 @@ Gry.Phx = (function() {
                 canvasCtx.restore();
             }
 
-            if (mouse.overMap) mouse.drawCursor(canvasCtx);
+            if (mouse.overMap) mouse.DrawCursor(canvasCtx);
         };
 
         var updatePanels = function() {
