@@ -4,15 +4,18 @@
 
     Gry.GUI = Class.extend({
         init: function(viewDivId) {
-            this.viewDivId = viewDivId;
-            this.$viewDiv = $('#'+viewDivId);
-            this.viewWidth = this.$viewDiv.width();
+            this.viewDivId  = viewDivId;
+            this.$viewDiv   = $('#'+viewDivId);
+            this.viewWidth  = this.$viewDiv.width();
             this.viewHeight = this.$viewDiv.height();
 
-            this.canvasId = null;
-            this.$canvas = null;
+            this.canvasId   = null;
+            this.$canvas    = null;
 
             this.$ctrlPanel = null;
+            this.$avoidOrb  = null;
+            this.$moveToOrb = null;
+            this.$pathOrb   = null;
         },
 
         setupCanvas: function(canvasId) {
@@ -102,6 +105,10 @@
             $('div.tabHeader')
                 .addClass(css_normalHeader)
                 .click(function() { $(this).next('.tabContent').toggle(); });
+
+            this.$avoidOrb  = $('#avoid');
+            this.$moveToOrb = $('#moveTo');
+            this.$pathOrb   = $('#path');
         }
     });
 

@@ -46,8 +46,6 @@ Gry.Phx = (function() {
 
         var viewDimW = null;
 
-        var mouse = null;
-
         var FPS = 30;
         var frameTime = 1000/FPS;
         var isTicking = false;
@@ -129,45 +127,33 @@ Gry.Phx = (function() {
          *  Setup DOM
          */
 
-        $canvas = Gry.gui.setupCanvas(canvasId);
+        Gry.gui.setupCanvas(canvasId);
         canvasCtx = Gry.gui.canvasCtx;
 
         /*
-         *  Mouse and GUI actions
+         *  Mouse, keyboard and GUI actions
          */
 
         Gry.mouse = new Gry.Mouse();
-        mouse = Gry.mouse;
-        $canvas.on('mouseenter',    mouse.onEnterMap.bind(mouse));
-        $canvas.on('mouseleave',    mouse.onLeaveMap.bind(mouse));
-        $canvas.on('mousemove',     mouse.onMoveOverMap.bind(mouse));
+        Gry.keyboard = new Gry.Keyboard();
+        Gry.actman = new Gry.ActivityManager(Gry.mouse, Gry.keyboard);
 
-        Gry.gui.$avoidOrb   = $('#avoid');
-        Gry.gui.$moveToOrb  = $('#moveTo');
-        Gry.gui.$pathOrb    = $('#path');
-
-        Gry.actman = new Gry.ActivityManager(Gry.mouse);
-
-        var bindKeyCode = function(keyCode, handler) {
-            var h = function(e) {
-                if (e.keyCode !== keyCode) return;
-                return handler(e);
-            };
-            Gry.gui.$canvas.on('keyup', h);
-        };
+        Gry.gui.$canvas.on('mouseenter',    Gry.mouse.onEnterMap.bind(Gry.mouse));
+        Gry.gui.$canvas.on('mouseleave',    Gry.mouse.onLeaveMap.bind(Gry.mouse));
+        Gry.gui.$canvas.on('mousemove',     Gry.mouse.onMoveOverMap.bind(Gry.mouse));
 
         Gry.actman.RegisterChain(
-            function(h) { Gry.gui.$avoidOrb.on('click', h); bindKeyCode(49, h); },
+            function(h) { Gry.gui.$avoidOrb.on('click', h); Gry.keyboard.bind(49, h); },
             new Gry.ActivityChain('set-AvoidOrb-target', [ new Gry.SetOrbTarget('avoid') ])
         );
 
         Gry.actman.RegisterChain(
-            function(h) { Gry.gui.$moveToOrb.on('click', h); bindKeyCode(50, h); },
+            function(h) { Gry.gui.$moveToOrb.on('click', h); Gry.keyboard.bind(50, h); },
             new Gry.ActivityChain('set-MoveToOrb-target', [ new Gry.SetOrbTarget('moveTo') ])
         );
 
         Gry.actman.RegisterChain(
-            function(h) { Gry.gui.$pathOrb.on('click', h); bindKeyCode(51, h); },
+            function(h) { Gry.gui.$pathOrb.on('click', h); Gry.keyboard.bind(51, h); },
             new Gry.ActivityChain('set-PathOrb-target', [ new Gry.SetOrbTarget('path'), new Gry.SetOrbTail(), new Gry.SetOrbTail(), new Gry.SetOrbTail() ])
         );
 
@@ -460,7 +446,7 @@ Gry.Phx = (function() {
                 canvasCtx.restore();
             }
 
-            if (mouse.overMap) mouse.DrawCursor(canvasCtx);
+            if (Gry.mouse.overMap) Gry.mouse.DrawCursor(canvasCtx);
         };
 
         var updatePanels = function() {

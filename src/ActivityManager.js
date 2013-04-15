@@ -1,9 +1,9 @@
 (function() {
 
     Gry.ActivityManager = Class.extend({
-        init: function(mouse) {
-            if (typeof mouse !== 'object') throw 'Not a mouse object';
+        init: function(mouse, keyboard) {
             this.mouse = mouse;
+            this.keyboard = keyboard;
             this.actChain = null;
             this.SetMode({ name: 'normal', param: null });
         },
@@ -22,6 +22,7 @@
             this.modeParam = (typeof mode.param === 'object' ? mode.param : null);
 
             this.mouse.setMode(mode.name);
+            Gry.keyboard.bind(27, this.AbortChain.bind(this));
         },
 
         SetNormalMode: function(chain) { this.SetMode({ name: 'normal' }, chain); },
@@ -40,6 +41,7 @@
             if (this.actChain) {
                 this.actChain.Abort();
             }
+            Gry.keyboard.unbind(27, this.AbortChain.bind(this));
         },
 
         ChainTriggered: function(chain) {
