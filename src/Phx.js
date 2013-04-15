@@ -147,20 +147,21 @@ Gry.Phx = (function() {
         Gry.gui.$pathOrb    = $('#path');
 
         Gry.actman = new Gry.ActivityManager(Gry.mouse);
+
         Gry.actman.RegisterChain(
             function(h) { Gry.gui.$avoidOrb.on('click', h); },
             new Gry.ActivityChain('set-AvoidOrb-target', [ new Gry.SetOrbTarget('avoid') ])
         );
+
         Gry.actman.RegisterChain(
             function(h) { Gry.gui.$moveToOrb.on('click', h); },
             new Gry.ActivityChain('set-MoveToOrb-target', [ new Gry.SetOrbTarget('moveTo') ])
         );
-        /*
+
         Gry.actman.RegisterChain(
             function(h) { Gry.gui.$pathOrb.on('click', h); },
-            new Gry.ActivityChain('test-chain-1', [ new Gry.SetOrbTarget('moveTo'), new Gry.SetOrbTarget('avoid') ])
+            new Gry.ActivityChain('set-PathOrb-target', [ new Gry.SetOrbTarget('path'), new Gry.SetOrbTail(), new Gry.SetOrbTail(), new Gry.SetOrbTail() ])
         );
-        */
 
         /*
          *  Setup Box2D
@@ -512,6 +513,9 @@ Gry.Phx = (function() {
             //  The entities are attached as user data
             var eA = contact.GetFixtureA().GetBody().GetUserData();
             var eB = contact.GetFixtureB().GetBody().GetUserData();
+
+            //  Walls don't count
+            if (eA.entityType === Gry.EntityType.WALL || eB.entityType === Gry.EntityType.WALL) return;
 
             //  Damage
             if (eA.team !== eB.team) {  //  No friendly fire

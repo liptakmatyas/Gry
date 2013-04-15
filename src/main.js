@@ -3,7 +3,7 @@
     var setupLevel = function(G) {
         var nFighters = 30;
         var teamsInGame = [
-            { color: 'x00',    heroLevel: 1,   fighterMode: 'fight' }
+            { color: 'x00',    heroLevel: 1,   fighterMode: 'shield' }
         ,   { color: '0x0',    heroLevel: 1,   fighterMode: 'shield' }
         ,   { color: '00x',    heroLevel: 1,   fighterMode: 'shield' }
         ];

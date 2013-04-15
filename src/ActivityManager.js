@@ -14,15 +14,17 @@
         //      -   param:  OPTIONAL parameters for the mode
         //
         //  -   Syncs the mouse cursor to the new mode.
-        SetMode: function(mode) {
-            this.AbortChain();
+        SetMode: function(mode, chain) {
+            if (this.mode !== 'normal' && this.actChain !== chain) {
+                this.AbortChain();
+            }
             this.mode = mode.name;
             this.modeParam = (typeof mode.param === 'object' ? mode.param : null);
 
             this.mouse.setMode(mode.name);
         },
 
-        SetNormalMode: function() { this.SetMode({ name: 'normal' }); },
+        SetNormalMode: function(chain) { this.SetMode({ name: 'normal' }, chain); },
         GetModeParam: function() { return this.modeParam; },
 
         //  Set up a chain of GUIActions and return the first event handler
@@ -46,6 +48,11 @@
                 this.AbortChain();
             }
             this.actChain = chain;
+        },
+
+        ChainDone: function(chain) {
+            if (this.actChain !== chain) throw 'An unknown activity chain finished.';
+            this.actChain = null;
         }
 
     });

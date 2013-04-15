@@ -20,7 +20,8 @@
             this.mode = 'normal';
             this.cursor = {
                 normal:         { src: 'img/cursor.normal.64x64.png', loaded: false, img: null },
-                SetOrbTarget:   { src: 'img/cursor.place.64x64.png', loaded: false, img: null }
+                SetOrbTarget:   { src: 'img/cursor.placeOrb.64x64.png', loaded: false, img: null },
+                SetOrbTail:     { src: 'img/cursor.placeTail.64x64.png', loaded: false, img: null }
             };
 
             loadCursors(this.cursor);

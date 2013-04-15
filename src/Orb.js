@@ -45,6 +45,8 @@
             this.id = orb.id;
             this.team = orb.team;
             this.type = orb.type;
+            this.creatorChain = orb.creatorChain;
+            this.creatorChainTS = orb.creatorChainTS;
             this.radiusM = orb.radius;
             this.radiusW = GSys.scaleLen2W(orb.radius);
         }

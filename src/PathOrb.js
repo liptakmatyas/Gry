@@ -16,6 +16,8 @@
     };
 
     Gry.PathOrb = Gry.Orb.extend({
+        //  ->  GSys:           The main Gry system object
+        //  ->  orbStat:        Orb parameters
         init: function(GSys, orbStat) {
             this._super(GSys, orbStat);
             
@@ -29,8 +31,13 @@
             this.body.CreateFixture(orbRangeFixtDef(this.rangeW));
         },
 
+        AddTail: function(mapPos) {
+            if (this.tail) this.tail.push(mapPos);
+            else this.tail = [mapPos];
+        },
+
         force: function(fp) {
-            return (fp.R2 >= this.rangeW2 ? { sym: 'a', size: fp.R2 } : null);
+            return (fp.R2 >= this.rangeW2 ? { sym: 'a', size: 50 } : null);
         },
 
         draw: function(canvasCtx, pos) {
@@ -41,7 +48,7 @@
             //
             //  FIXME   If the hero is in the intersection of the old and new orb's range,
             //          no new BeginContact is generated (?) and thus the new orb will never be hit,
-            //          so the hero get stuck.
+            //          so the hero gets stuck.
             if (this.jump) {
                 var nextPos = undefined;
                 if (this.tail) { nextPos = this.tail.shift(); }

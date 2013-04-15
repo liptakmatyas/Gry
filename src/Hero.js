@@ -53,6 +53,15 @@
             for (var i = 0; i < n; ++i) {
                 if (orbs[i].id === orbId) {
                     var orb = orbs.splice(i, 1)[0];
+                    //  If creatorChain is defined, that means that this orb
+                    //  was placed by a GUIActivity from an activity chain.
+                    //  That chain might still be active, while this orb goes
+                    //  away, so abort the creator chain if it is.
+                    if (typeof orb.creatorChain !== 'undefined'
+                    && orb.creatorChain === Gry.actman.actChain
+                    && orb.creatorChainTS === Gry.actman.actChain.timestamp) {
+                        Gry.actman.AbortChain();
+                    }
                     Gry.World.DestroyBody(orb.body);
                     break;  //  The id should be unique...
                 }
