@@ -1,4 +1,4 @@
-#   Gry, the RPS
+#   Gry
 
 Submission for Udacity's HTML5 Game Development Contest
 
@@ -9,9 +9,7 @@ Submission for Udacity's HTML5 Game Development Contest
 
 ##  Credits
 
--   [box2dweb](https://code.google.com/p/box2dweb/)
+-   Powered by [box2dweb](https://code.google.com/p/box2dweb/) and [jQuery](https://jquery.org/)
 -   Icons from [game-icons.net](http://game-icons.net/)
-    -   TODO: links to individual icons with proper attribution
 -   Mouse cursors from [opengameart.org](http://opengameart.org/)
-    -   TODO: proper attribution
 
