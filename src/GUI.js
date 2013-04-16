@@ -55,11 +55,13 @@
             var CPFrag =
                 GryFrag.imgLabel('colonyHeader', 'colony', teamName, 'Huge') +
 
+                /*
                 GryFrag.tab('colonyTab', 'colony', 'COLONY',
                     GryFrag.hpBox('colonyHP', '123456', '999999') +
                     GryFrag.goldBox('colonyGold', '1234', '9999') +
                     GryFrag.manaBox('colonyMana', '12', '99')
                 ) +
+                */
 
                 GryFrag.tab('heroTab', 'hero', 'HERO',
                     GryFrag.imgLabel('heroHP', 'hp', '123456/999999') +
@@ -72,11 +74,11 @@
                         '</div>' +
                     '</div>' +
                     '<div id="heroOrbs">' +
-                        GryFrag.imgButton('avoid', 'avoid') +
-                        GryFrag.imgButton('moveTo', 'moveto') +
-                        GryFrag.imgButton('path', 'path') +
+                        GryFrag.avoidOrbBox() +
+                        //GryFrag.imgButton('moveTo', 'moveto') +
+                        //GryFrag.imgButton('path', 'path') +
                     '</div>'
-                ) +
+                //) +
 
                 /*
                 GryFrag.tab('swarmTab', 'swarm', 'SWARMS',
@@ -92,12 +94,12 @@
                         GryFrag.imgButton('orbiterCannonButton', 'orbiter-canon') +
                     '</div>'
                 ) +
-                */
 
                 GryFrag.tab('shopTab', 'shop', 'SHOP',
                     '<div id="shopBox">' +
                         GryFrag.shopItem(amount, itemName, itemDesc, goldCost, manaCost) +
                     '</div>'
+                */
                 );
 
             this.$ctrlPanel = $('#controlPanel').append(CPFrag);

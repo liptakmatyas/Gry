@@ -40,7 +40,7 @@
             return (fp.R2 >= this.rangeW2 ? { sym: 'a', size: 50 } : null);
         },
 
-        draw: function(canvasCtx, pos) {
+        draw: function(canvasCtx) {
             //console.log('[ORB.moveTo.draw] pos:', pos);
 
             //  Jump to next location if the hero reached this one,
@@ -87,14 +87,14 @@
             canvasCtx.fillStyle = Gry.scaledTeamColor(this.team, 0.5, 0.1);
             canvasCtx.strokeStyle = Gry.scaledTeamColor(this.team, 1, 0.2);
             canvasCtx.beginPath();
-            canvasCtx.arc(pos.x, pos.y, this.rangeM, 0, 2*Math.PI, false);
+            canvasCtx.arc(this.mapPos.x, this.mapPos.y, this.rangeM, 0, 2*Math.PI, false);
             canvasCtx.fill();
             canvasCtx.stroke();
             canvasCtx.restore();
 
             //  Render orb
             canvasCtx.beginPath();
-            canvasCtx.arc(pos.x, pos.y, this.radiusM, 0, 2*Math.PI, false);
+            canvasCtx.arc(this.mapPos.x, this.mapPos.y, this.radiusM, 0, 2*Math.PI, false);
             canvasCtx.fill();
         }
 

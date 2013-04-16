@@ -1,16 +1,5 @@
 (function() {
 
-    var loadCursors = function(cursorList) {
-        for (var crsName in cursorList) {
-            var crs = cursorList[crsName];
-            crs.img = new Image();
-            crs.img.onload = function(crs) {
-                return function() { crs.loaded = true; };
-            }(crs);
-            crs.img.src = crs.src;
-        }
-    }
-
     Gry.Mouse = Class.extend({
         init: function() {
             this.x = 0;
@@ -24,7 +13,7 @@
                 SetOrbTail:     { src: 'img/cursor.placeTail.64x64.png', loaded: false, img: null }
             };
 
-            loadCursors(this.cursor);
+            Gry.assetMgr.loadAssetList(this.cursor);
         },
 
         onEnterMap: function(e) { this.overMap = true; return false; },

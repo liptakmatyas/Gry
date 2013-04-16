@@ -145,7 +145,7 @@ div.dualLabel div {
     top: 5px;
     width: 369px;
     height: 600px;
-    background-color: #BBB;
+    background-color: #FFF;
 }
 
 #colonyHeader_imgLabel { margin-bottom: 10px; }
@@ -162,6 +162,28 @@ div.statRow { height: 16px; }
 div.statRow div { display: inline-block; }
 div.statRow div.dmgshd { float: right; }
 
+#heroOrbs div div.shortcutKeyIcon {
+    float: left;
+}
+
+#heroOrbs div div.shortcutKeyIcon span {
+    display: inline-block;
+    width: 32px;
+    height: 32px;
+    font-family: monospace;
+    font-size: 30px;
+    text-align: center;
+}
+
+#avoidOrbBox div.label {
+    position: absolute;
+    top: 0;
+    min-width: 128px;
+    height: 32px;
+    text-align: right;
+    font-size: 32px;
+}
+
 #shopBox {
     height: 128px;
     overflow-y: scroll;
@@ -174,17 +196,18 @@ div.shopItem {
     background-color: #FFF;
 }
 
-div.shopItem div.amountBox {
+div.amountBox {
     display: inline-block;
+    float: right;
     position: absolute;
     height: 32px;
 }
 
-div.shopItem div.amountBox div.plusMinus {
+div.amountBox div.plusMinus {
     display: inline-block;
 }
 
-div.shopItem div.amountBox div.plusMinus button {
+div.amountBox div.plusMinus button {
     display: block;
     width: 16px;
     height: 16px;
@@ -192,10 +215,10 @@ div.shopItem div.amountBox div.plusMinus button {
     font-family: sans-serif;
 }
 
-div.shopItem div.amountBox div.plusMinus button.plus { top: 0; }
-div.shopItem div.amountBox div.plusMinus button.minus { bottom: 0; }
+div.amountBox div.plusMinus button.plus { top: 0; }
+div.amountBox div.plusMinus button.minus { bottom: 0; }
 
-div.shopItem div.amountBox div.amount {
+div.amountBox div.amount {
     display: inline-block;
     position: absolute;
     left: 16px;

@@ -4,14 +4,16 @@
         WALL:   'wall',
         UNIT:   'unit',
         HERO:   'hero',
-        ORB:    'orb'
+        ORB:    'orb',
+        ITEM:   'item'
     };
 
     Gry.EntityCategory = {
         WALL:   0x0001,
         UNIT:   0x0002,
         HERO:   0x0004,
-        ORB:    0x0008
+        ORB:    0x0008,
+        ITEM:   0x0010
     };
 
     Gry.Entity = Class.extend({
@@ -33,7 +35,7 @@
 
             this.body = e.body;
             this.body.SetUserData(this);
-        },
+        }
 
     });
 

@@ -53,8 +53,10 @@ Gry.Phx = (function() {
 
         Gry.heroes = [];
         Gry.fighters = [];
+        Gry.items = [];
         var heroes = Gry.heroes;
         var fighters = Gry.fighters;
+        var items = Gry.items;
 
         var G = {
 
@@ -69,9 +71,6 @@ Gry.Phx = (function() {
                 stat.unitIdx = heroes.length;
                 var H = new Gry.Hero(this, stat);
                 heroes.push(H);
-                //console.log('[AddHero] H.x, H.y:', H.mapPos.x, H.mapPos.y);
-                //console.log('[AddHero] H.body{x,y}:', H.body.GetPosition().x, H.body.GetPosition().y);
-                //console.log('[AddHero] Added hero:', H);
                 return H;
             },
 
@@ -80,6 +79,13 @@ Gry.Phx = (function() {
                 var F = new Gry.Fighter(this, stat);
                 fighters.push(F);
                 return F;
+            },
+
+            AddTreasure: function(stat) {
+                stat.itemIdx = items.length;
+                var T = new Gry.Treasure(this, stat);
+                items.push(T);
+                return T;
             },
 
             StartLoop: function() {
@@ -349,20 +355,19 @@ Gry.Phx = (function() {
         };
 
         var updateView = function() {
-            var nHeroes = heroes.length;
-            var nFighters = fighters.length;
+            var nHeroes     = heroes.length;
+            var nFighters   = fighters.length;
+            var nItems      = items.length;
+
             var i;
 
             for (i = 0; i < nHeroes; ++i) {
                 var hero = heroes[i];
                 if (hero === null) continue;
-                //console.log('[updateView] hero.x, hero.y:', hero.mapPos.x, hero.mapPos.y);
-                //console.log('[updateView] hero.body{x,y}:', hero.body.GetPosition().x, hero.body.GetPosition().y);
 
                 if (hero.HP > 0) {
                     hero.updateMapPosDim();
                 } else {
-                    //console.log('[updateView] DIED index, hero:', i, hero);
                     if (i === 0) { updatePanels(); }
                     Gry.World.DestroyBody(hero.body);
                     heroes[i] = null;
@@ -375,9 +380,18 @@ Gry.Phx = (function() {
                 if (fighter.HP > 0) {
                     fighter.updateMapPosDim();
                 } else {
-                    //console.log('[updateView] DIED index, fighter:', i, fighter);
                     Gry.World.DestroyBody(fighter.body);
                     fighters[i] = null;
+                }
+            }
+
+            //  Draw items
+            for (i = 0; i < nItems; ++i) {
+                var item = items[i];
+                if (item === null) continue;
+                if (typeof item.draw === 'function') {
+                    item.updateMapPosDim();
+                    item.draw(canvasCtx);
                 }
             }
 
@@ -395,7 +409,7 @@ Gry.Phx = (function() {
                     var orb = orbs[j];
                     if (typeof orb !== 'undefined' && orb !== null) {
                         if (typeof orb.draw !== 'function') { throw 'orb.draw is not a function'; }
-                        orb.draw(canvasCtx, orb.mapPos);
+                        orb.draw(canvasCtx);
                     }
                 }
 

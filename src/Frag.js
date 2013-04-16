@@ -33,15 +33,11 @@ Gry.Frag = (function($) {
 
         imgButton: function(buttonId, imgName, buttonType) {
             var dim = dimension(buttonType);
-            /*
-            return '<button id="'+buttonId+'" class="imgButton'+dim.type+'">' +
-                '<img src="img/'+imgName+'.'+dim.size+'.png"/>' +
-            '</button>';
-            */
             return '<img id="'+buttonId+'" class="imgButton'+dim.type+'" ' +
                 'src="img/'+imgName+'.'+dim.size+'.png"/>';
         },
 
+        /*
         dualLabel: function(id, iconNameA, labelA, iconNameB, labelB) {
             return '<div id="'+id+'" class="dualLabel">' +
                 '<img class="A" src="img/'+iconNameA+'.32x32.png"/>' +
@@ -50,11 +46,37 @@ Gry.Frag = (function($) {
                 '<img class="B" src="img/'+iconNameB+'.32x32.png"/>' +
             '</div>';
         },
+        */
 
         hpBox: function(boxId, act, max) {
             return this.dualLabel(boxId, 'hp', act, 'hp', max);
         },
 
+        shortcutKeyIcon: function(key) {
+            return '<div class="shortcutKeyIcon">' +
+                '<span>' + key + '</span>' +
+            '</div>';
+        },
+
+        amountBox: function(id, label, amount) {
+            return '<div class="amountBox">' +
+                '<div class="plusMinus">' +
+                    '<button class="plus">+</button>' +
+                    '<button class="minus">-</button>' +
+                '</div>' +
+                '<div id="'+id+'" class="amount">'+amount+'</div>' +
+                '<div class="label">' + label + '</div>' +
+            '</div>';
+        },
+
+        avoidOrbBox: function() {
+            return '<div id="avoidOrbBox">' +
+                this.shortcutKeyIcon('1') +
+                this.imgButton('avoid', 'avoid') +
+            '</div>';
+        },
+
+        /*
         goldBox: function(boxId, act, gain) {
             return this.dualLabel(boxId, 'gold', act, 'gold', gain);
         },
@@ -83,9 +105,11 @@ Gry.Frag = (function($) {
                 this.imgButton(itemName+'_buyButton', 'buy');
             '</div>'
         }
+        */
 
     };
 
     return Frag;
+
 })(jQuery);
 

@@ -2,6 +2,7 @@
 
     var setupLevel = function(G) {
         var nFighters = 0;
+        var nTreasure = 1;
         var teamsInGame = [
             { color: 'x00',    heroLevel: 1,   fighterMode: 'shield' }
         //,   { color: '0x0',    heroLevel: 1,   fighterMode: 'shield' }
@@ -66,7 +67,7 @@
 
             for (j = 0; j < nFighters; ++j) {
                 var maxHP = 50;
-                var fighter = G.AddFighter({
+                G.AddFighter({
                     team: team.color,
                     HP: maxHP,
                     maxHP: maxHP,
@@ -74,10 +75,18 @@
                     mapPos: Gry.rndPos(G.MapDim())
                 });
             }
+
+            for (j = 0; j < nTreasure; ++j) {
+                G.AddTreasure({
+                    team: team.color,
+                    mapPos: Gry.rndPos(G.MapDim())
+                });
+            }
         }
     };
 
     $(document).ready(function() {
+        Gry.assetMgr = new Gry.AssetManager();
         Gry.gui = new Gry.GUI('viewDiv');
         Gry.gui.setupControlPanelDOM();
 
