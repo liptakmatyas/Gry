@@ -1,0 +1,166 @@
+/*
+ *  RESET
+ */
+
+* {
+    padding: 0;
+    margin: 0;
+    border: 0px none;
+    border-collapse: collapse;
+    font-family: "Lucida Console", Monaco, monospace;
+}
+
+/*
+ *  Widgets
+ */
+
+div.tab {
+    position: relative;
+}
+
+div.tabHeader {
+    position: relative;
+    height: 16px;
+}
+
+div.tabHeader div.label {
+    position: absolute;
+    left: 16px;
+    top: 0;
+    height: 16px;
+    padding-left: 8px;
+}
+
+div.tabContent {
+    position: relative;
+    top: 0;
+    min-width: 369px;
+    width: 369px;
+    min-height: 128px;
+    height: 128px;
+}
+
+div.imgLabelSmall {
+    display: inline-block;
+    position: relative;
+    min-width: 80px;
+    width: 80px;
+    height: 16px;
+}
+
+div.imgLabelSmall div.label {
+    position: absolute;
+    left: 16px;
+    top: 0;
+    min-width: 64px;
+    width: 64px;
+    height: 16px;
+    text-align: right;
+    font-size: 16px;
+}
+
+div.imgLabelNormal {
+    display: inline-block;
+    position: relative;
+    min-width: 160px;
+    width: 160px;
+    height: 32px;
+}
+
+div.imgLabelNormal div.label {
+    position: absolute;
+    left: 32px;
+    top: 0;
+    min-width: 128px;
+    height: 32px;
+    text-align: right;
+    font-size: 32px;
+}
+
+div.imgLabelHuge {
+    position: relative;
+    height: 64px;
+}
+
+div.imgLabelHuge div.label {
+    position: absolute;
+    left: 64px;
+    top: 0;
+    height: 64px;
+    font-size: 64px;
+    font-weight: bold;
+}
+
+img.imgButtonNormal { display: inline-block; top: 0; width: 32px; height: 32px; }
+
+/*
+ *  Team colors
+ */
+
+.red-normal { color: #800; }
+.red-active { background-color: #F00; color: #800; }
+
+/*
+ *  Main screen
+ */
+
+#gameWin {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 1024px;
+    height: 610px;
+    background-color: #EEE;
+}
+
+#viewDiv {
+    display: inline-block;
+    position: absolute;
+    left: 5px;
+    top: 5px;
+    width: 640px;
+    height: 600px;
+    cursor: none;
+}
+
+#controlPanel {
+    display: inline-block;
+    position: absolute;
+    left: 650px;
+    top: 5px;
+    width: 369px;
+    height: 600px;
+    background-color: #FFF;
+}
+
+#colonyHeader_imgLabel { margin-bottom: 10px; }
+
+#treasureBox { height: 64px; }
+#totalGold_imgLabel { top: 0px; float: left; }
+#plusGold_imgLabel { top: 0px; float: right; }
+#totalMana_imgLabel { bottom: 0px; float: left; }
+#plusMana_imgLabel { bottom: 0px; float: right; }
+
+#heroHP { width: 337px }
+
+div.statRow { height: 32px; }
+div.statRow div.heroXP_imgLabel { display: float; float: right; }
+
+div.shortcutlist { height: 32px; }
+div.shortcutlist.active.red     { background-color: #800; color: #F00; }
+div.shortcutlist.active.green   { background-color: #080; color: #0F0; }
+div.shortcutlist.active.blue    { background-color: #008; color: #00F; }
+div.shortcutlist div.shortcutKeyIcon { float: left; }
+
+div.shortcutlist div.shortcutKeyIcon span {
+    display: inline-block;
+    width: 32px;
+    height: 32px;
+    font-family: monospace;
+    font-size: 30px;
+    text-align: center;
+}
+
+#heroOrbs { margin-top: 10px; }
+#fighterModes { margin-top: 10px; }
+
