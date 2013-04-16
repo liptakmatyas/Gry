@@ -93,21 +93,6 @@ div.imgLabelHuge div.label {
 
 img.imgButtonNormal { display: inline-block; top: 0; width: 32px; height: 32px; }
 
-div.dualLabel { font-size: 32px; height: 32px; }
-div.dualLabel * { display: inline-block; }
-div.dualLabel img.A { float: left; }
-div.dualLabel div.A { float: left; }
-div.dualLabel img.B { float: right; }
-div.dualLabel div.B { float: right; }
-div.dualLabel div {
-    position: relative;
-    top: 0;
-    min-width: 128px;
-    height: 32px;
-    text-align: right;
-    font-size: 32px;
-}
-
 /*
  *  Team colors
  */
@@ -158,15 +143,16 @@ div.dualLabel div {
 
 #heroHP { width: 337px }
 
-div.statRow { height: 16px; }
-div.statRow div { display: inline-block; }
-div.statRow div.dmgshd { float: right; }
+div.statRow { height: 32px; }
+div.statRow div.heroXP_imgLabel { display: float; float: right; }
 
-#heroOrbs div div.shortcutKeyIcon {
-    float: left;
-}
+div.shortcutlist { height: 32px; }
+div.shortcutlist.active.red     { background-color: #800; color: #F00; }
+div.shortcutlist.active.green   { background-color: #080; color: #0F0; }
+div.shortcutlist.active.blue    { background-color: #008; color: #00F; }
+div.shortcutlist div.shortcutKeyIcon { float: left; }
 
-#heroOrbs div div.shortcutKeyIcon span {
+div.shortcutlist div.shortcutKeyIcon span {
     display: inline-block;
     width: 32px;
     height: 32px;
@@ -175,95 +161,6 @@ div.statRow div.dmgshd { float: right; }
     text-align: center;
 }
 
-#avoidOrbBox div.label {
-    position: absolute;
-    top: 0;
-    min-width: 128px;
-    height: 32px;
-    text-align: right;
-    font-size: 32px;
-}
-
-#shopBox {
-    height: 128px;
-    overflow-y: scroll;
-}
-
-div.shopItem {
-    position: relative;
-    width: 350px;
-    height: 32px;
-    background-color: #FFF;
-}
-
-div.amountBox {
-    display: inline-block;
-    float: right;
-    position: absolute;
-    height: 32px;
-}
-
-div.amountBox div.plusMinus {
-    display: inline-block;
-}
-
-div.amountBox div.plusMinus button {
-    display: block;
-    width: 16px;
-    height: 16px;
-    font-size: 16px;
-    font-family: sans-serif;
-}
-
-div.amountBox div.plusMinus button.plus { top: 0; }
-div.amountBox div.plusMinus button.minus { bottom: 0; }
-
-div.amountBox div.amount {
-    display: inline-block;
-    position: absolute;
-    left: 16px;
-    bottom: 0;
-    width: 48px;
-    height: 32px;
-    font-size: 32px;
-    text-align: center;
-}
-
-div.shopItem div.itemIcon img {
-    position: absolute;
-    left: 64px;
-    bottom: 0;
-    width: 32px;
-    height: 32px;
-}
-
-div.shopItem div.itemDesc {
-    display: inline-block;
-    position: absolute;
-    left: 96px;
-    bottom: 0;
-    width: 120px;
-    height: 32px;
-    font-size: 10pt;
-}
-
-div.shopItem div.costBox {
-    display: inline-block;
-    position: relative;
-    left: 216px;
-    top: 0;
-    width: 80px;
-    height: 32px;
-    font-size: 10pt;
-}
-
-div.shopItem div.costBox * {
-    display: inline-block;
-    float: left;
-    position: relative;
-    top: 0;
-    height: 16px;
-}
-
-div.shopItem img.imgButtonNormal { float: right; }
+#heroOrbs { margin-top: 10px; }
+#fighterModes { margin-top: 10px; }
 

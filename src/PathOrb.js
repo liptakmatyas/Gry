@@ -37,7 +37,7 @@
         },
 
         force: function(fp) {
-            return (fp.R2 >= this.rangeW2 ? { sym: 'a', size: 50 } : null);
+            return (fp.R2 >= this.rangeW2 ? { sym: 'a', size: 30/fp.R2 } : null);
         },
 
         draw: function(canvasCtx) {

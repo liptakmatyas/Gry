@@ -69,10 +69,38 @@ Gry.Frag = (function($) {
             '</div>';
         },
 
-        avoidOrbBox: function() {
-            return '<div id="avoidOrbBox">' +
+        AvoidOrbBox: function() {
+            return '<div id="AvoidOrbBox" class="shortcutlist">' +
                 this.shortcutKeyIcon('1') +
                 this.imgButton('avoid', 'avoid') +
+            '</div>';
+        },
+
+        MoveToOrbBox: function() {
+            return '<div id="MoveToOrbBox" class="shortcutlist">' +
+                this.shortcutKeyIcon('2') +
+                this.imgButton('moveTo', 'moveto') +
+            '</div>';
+        },
+
+        PathOrbBox: function() {
+            return '<div id="PathOrbBox" class="shortcutlist">' +
+                this.shortcutKeyIcon('3') +
+                this.imgButton('path', 'path') +
+            '</div>';
+        },
+
+        FMShieldBox: function() {
+            return '<div id="FMShieldBox" class="shortcutlist">' +
+                this.shortcutKeyIcon('S') +
+                this.imgButton('shield', 'shield') +
+            '</div>';
+        },
+
+        FMFightBox: function() {
+            return '<div id="FMFightBox" class="shortcutlist">' +
+                this.shortcutKeyIcon('F') +
+                this.imgButton('fight', 'attack') +
             '</div>';
         },
 

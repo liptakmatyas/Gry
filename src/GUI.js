@@ -41,19 +41,9 @@
             return this.$canvas;
         },
 
-        setupControlPanelDOM: function() {
-            //  FIXME   Hard-coded values
-            var teamColorName = 'red';
-            var teamName = 'Red';
-            var css_normalHeader = teamColorName+'-normal';
-            var amount = 99;
-            var itemName = 'helm';
-            var itemDesc = 'Description of helm';
-            var goldCost = 1234;
-            var manaCost = 5678;
-
+        setupControlPanelDOM: function(team) {
             var CPFrag =
-                GryFrag.imgLabel('colonyHeader', 'colony', teamName, 'Huge') +
+                GryFrag.imgLabel('colonyHeader', 'colony', team, 'Huge') +
 
                 /*
                 GryFrag.tab('colonyTab', 'colony', 'COLONY',
@@ -64,19 +54,25 @@
                 */
 
                 GryFrag.tab('heroTab', 'hero', 'HERO',
-                    GryFrag.imgLabel('heroHP', 'hp', '123456/999999') +
+                    GryFrag.imgLabel('heroHP', 'hp', '') +
                     '<div class="statRow">' +
-                        GryFrag.imgLabel('heroLevel', 'level', 999, 'Small') +
-                        GryFrag.imgLabel('heroXP', 'level', 123456, 'Small') +
+                        GryFrag.imgLabel('heroGold', 'gold', '') +
+                        GryFrag.imgLabel('heroXP', 'level', '') +
+                        /*
                         '<div class="dmgshd">' +
                             GryFrag.imgLabel('heroDamage', 'damage', 123.45, 'Small') +
                             GryFrag.imgLabel('heroShield', 'shield', 999.99, 'Small') +
                         '</div>' +
+                        */
                     '</div>' +
                     '<div id="heroOrbs">' +
-                        GryFrag.avoidOrbBox() +
-                        //GryFrag.imgButton('moveTo', 'moveto') +
-                        //GryFrag.imgButton('path', 'path') +
+                        GryFrag.AvoidOrbBox() +
+                        GryFrag.MoveToOrbBox() +
+                        GryFrag.PathOrbBox() +
+                    '</div>' +
+                    '<div id="fighterModes">' +
+                        GryFrag.FMShieldBox() +
+                        GryFrag.FMFightBox() +
                     '</div>'
                 //) +
 
@@ -102,15 +98,21 @@
                 */
                 );
 
+            var css_normalHeader = team+'-normal';
             this.$ctrlPanel = $('#controlPanel').append(CPFrag);
             $('#colonyHeader').addClass(css_normalHeader);
             $('div.tabHeader')
                 .addClass(css_normalHeader)
                 .click(function() { $(this).next('.tabContent').toggle(); });
+            $('div.shortcutlist').addClass(team);
 
             this.$avoidOrb  = $('#avoid');
             this.$moveToOrb = $('#moveTo');
             this.$pathOrb   = $('#path');
+
+            this.$shield    = $('#shield');
+            this.$fight     = $('#fight');
+            
         }
     });
 

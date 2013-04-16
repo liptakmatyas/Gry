@@ -1,12 +1,12 @@
 (function($) {
 
     var setupLevel = function(G) {
-        var nFighters = 0;
-        var nTreasure = 1;
+        var nFighters = 30;
+        var nTreasure = 5;
         var teamsInGame = [
             { color: 'x00',    heroLevel: 1,   fighterMode: 'shield' }
-        //,   { color: '0x0',    heroLevel: 1,   fighterMode: 'shield' }
-        //,   { color: '00x',    heroLevel: 1,   fighterMode: 'shield' }
+        ,   { color: '0x0',    heroLevel: 1,   fighterMode: 'shield' }
+        ,   { color: '00x',    heroLevel: 1,   fighterMode: 'shield' }
         ];
 
         var i, n = teamsInGame.length;
@@ -16,12 +16,18 @@
 
             var hero = G.AddHero({
                 symbol: String.fromCharCode(parseInt('25A3', 16)),
+                XP: 0,
                 level: team.heroLevel,
+                gold: 0,
                 HP: maxHP,
                 maxHP: maxHP,
                 team: team.color,
+                fighterMode: team.fighterMode,
                 mapPos: Gry.rndPos(G.MapDim())
             });
+            if (team.color === 'x00') {
+                Gry.plr = { hero: hero };
+            }
 
             /*
             var orb = new Gry.PathOrb(G, {
@@ -67,11 +73,10 @@
 
             for (j = 0; j < nFighters; ++j) {
                 var maxHP = 50;
-                G.AddFighter({
+                G.AddFighter(hero, {
                     team: team.color,
                     HP: maxHP,
                     maxHP: maxHP,
-                    fighterMode: team.fighterMode,
                     mapPos: Gry.rndPos(G.MapDim())
                 });
             }
@@ -88,7 +93,7 @@
     $(document).ready(function() {
         Gry.assetMgr = new Gry.AssetManager();
         Gry.gui = new Gry.GUI('viewDiv');
-        Gry.gui.setupControlPanelDOM();
+        Gry.gui.setupControlPanelDOM('red');
 
         //  FIXME   Gry.Phx is not a Class yet...
         Gry.phx = Gry.Phx({

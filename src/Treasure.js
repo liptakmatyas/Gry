@@ -3,9 +3,15 @@
     Gry.ItemType.TREASURE = 'treasure';
 
     var treasureIcon = {
-        'crystal': { src: 'img/crystal.32x32.png', loaded: false, img: null },
-        'diamond': { src: 'img/diamond.32x32.png', loaded: false, img: null },
-        'emerald': { src: 'img/emerald.32x32.png', loaded: false, img: null },
+        'red-crystal':      { src: 'img/crystal.red-normal-32x32.png', loaded: false, img: null },
+        'red-diamond':      { src: 'img/diamond.red-normal-32x32.png', loaded: false, img: null },
+        'red-emerald':      { src: 'img/emerald.red-normal-32x32.png', loaded: false, img: null },
+        'green-crystal':    { src: 'img/crystal.green-normal-32x32.png', loaded: false, img: null },
+        'green-diamond':    { src: 'img/diamond.green-normal-32x32.png', loaded: false, img: null },
+        'green-emerald':    { src: 'img/emerald.green-normal-32x32.png', loaded: false, img: null },
+        'blue-crystal':     { src: 'img/crystal.blue-normal-32x32.png', loaded: false, img: null },
+        'blue-diamond':     { src: 'img/diamond.blue-normal-32x32.png', loaded: false, img: null },
+        'blue-emerald':     { src: 'img/emerald.blue-normal-32x32.png', loaded: false, img: null },
     };
 
     var treasureIconNames = [];
@@ -15,6 +21,8 @@
 
     Gry.Treasure = Gry.Item.extend({
         init: function(GSys, treasure) {
+            Gry.assetMgr.loadAssetList(treasureIcon);
+
             this._super(GSys, {
                 entityType: Gry.Entity.ITEM,
                 itemType: Gry.ItemType.TREASURE,
@@ -24,7 +32,9 @@
                 mapDim: { w: 32, h: 32 }
             });
 
-            Gry.assetMgr.loadAssetList(treasureIcon);
+            this.collected = false;
+            this.price = 100;
+            this.XP = 5;
             this.pickIcon();
         },
 
@@ -36,7 +46,11 @@
         force: function() { return 0; },
 
         draw: function(canvasCtx) {
-            canvasCtx.drawImage(this.image, this.mapPos.x-this.box.hW, this.mapPos.y-this.box.hH);
+            canvasCtx.save();
+            canvasCtx.translate(this.mapPos.x, this.mapPos.y);
+            canvasCtx.rotate(this.box.a);
+            canvasCtx.drawImage(this.image, -this.box.hW, -this.box.hH);
+            canvasCtx.restore();
         },
 
         //  NOTE:   Assumes having exactly one fixture: a rectangle.

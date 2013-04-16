@@ -32,7 +32,8 @@
     //  - at world position posW{x,y}
     //  - with half world scale size hdimW{w,h}
     var boxBody = function(posW, hdimW) {
-        var b = Gry.World.CreateBody(boxBodyDef(posW, b2Body.b2_staticBody));
+        //var b = Gry.World.CreateBody(boxBodyDef(posW, b2Body.b2_staticBody));
+        var b = Gry.World.CreateBody(boxBodyDef(posW, b2Body.b2_dynamicBody));
         var f = boxFixtDef(hdimW);
         b.CreateFixture(f);
         return b;
@@ -60,6 +61,7 @@
                 mapDim: item.mapDim
             });
 
+            this.collected = false;
             this.itemType = item.itemType;
             this.itemIdx = item.itemIdx;
             this.team = item.team;

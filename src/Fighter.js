@@ -3,13 +3,13 @@
     Gry.UnitType.FIGHTER = 'fighter';
 
     Gry.Fighter = Gry.Unit.extend({
-        init: function(GSys, stat) {
+        init: function(GSys, hero, stat) {
             //console.log('[Gry.Fighter] stat:', stat);
             this._super(GSys, {
                 entityType: Gry.EntityType.UNIT,
                 unitType: Gry.UnitType.FIGHTER,
                 unitIdx: stat.unitIdx,
-
+            
                 team: stat.team,
                 HP: stat.HP,
                 maxHP: stat.maxHP,
@@ -18,7 +18,7 @@
                 mapDim: { w: 5, h: 5 }
             });
 
-            this.fighterMode = stat.fighterMode;
+            this.hero = hero;
         }
 
     });

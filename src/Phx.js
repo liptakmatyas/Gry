@@ -26,8 +26,6 @@
 Gry.Phx = (function() {
 
     var GPhx = function(conf) {
-        //console.log('[Phx] conf:', conf);
-
         Gry.worldScale = conf.worldScale;
 
         var isDebugMode = conf.isDebugMode;
@@ -74,9 +72,9 @@ Gry.Phx = (function() {
                 return H;
             },
 
-            AddFighter: function(stat) {
+            AddFighter: function(hero, stat) {
                 stat.unitIdx = fighters.length;
-                var F = new Gry.Fighter(this, stat);
+                var F = new Gry.Fighter(this, hero, stat);
                 fighters.push(F);
                 return F;
             },
@@ -89,7 +87,6 @@ Gry.Phx = (function() {
             },
 
             StartLoop: function() {
-                console.log('[StartLoop]');
                 isTicking = true;
 
                 ticker = setInterval(function() { tick(); }, frameTime); // TODO RAF
@@ -144,24 +141,7 @@ Gry.Phx = (function() {
         Gry.keyboard = new Gry.Keyboard();
         Gry.actman = new Gry.ActivityManager(Gry.mouse, Gry.keyboard);
 
-        Gry.gui.$canvas.on('mouseenter',    Gry.mouse.onEnterMap.bind(Gry.mouse));
-        Gry.gui.$canvas.on('mouseleave',    Gry.mouse.onLeaveMap.bind(Gry.mouse));
-        Gry.gui.$canvas.on('mousemove',     Gry.mouse.onMoveOverMap.bind(Gry.mouse));
-
-        Gry.actman.RegisterChain(
-            function(h) { Gry.gui.$avoidOrb.on('click', h); Gry.keyboard.bind(49, h); },
-            new Gry.ActivityChain('set-AvoidOrb-target', [ new Gry.SetOrbTarget('avoid') ])
-        );
-
-        Gry.actman.RegisterChain(
-            function(h) { Gry.gui.$moveToOrb.on('click', h); Gry.keyboard.bind(50, h); },
-            new Gry.ActivityChain('set-MoveToOrb-target', [ new Gry.SetOrbTarget('moveTo') ])
-        );
-
-        Gry.actman.RegisterChain(
-            function(h) { Gry.gui.$pathOrb.on('click', h); Gry.keyboard.bind(51, h); },
-            new Gry.ActivityChain('set-PathOrb-target', [ new Gry.SetOrbTarget('path'), new Gry.SetOrbTail(), new Gry.SetOrbTail(), new Gry.SetOrbTail() ])
-        );
+        Gry.actman.setupEventHandlers();
 
         /*
          *  Setup Box2D
@@ -223,8 +203,6 @@ Gry.Phx = (function() {
         //  -   F{sym,size}: force symmetry and size
         //  -   fp{bA,bB,pA,pB,dx,dy,R2}: force pack
         var applyForce = function(F, fp) {
-            //console.log('[applyForce] F, fp:', F, fp);
-
             var bodyA = fp.bA;
             var bodyB = fp.bB;
 
@@ -252,8 +230,6 @@ Gry.Phx = (function() {
         //  <-  .dx, .dy: X/Y components of distance from A to B in world scale (signed!)
         //  <-  .R2: squared distance between A and B in world scale
         var createForcePack = function(eA, eB) {
-            //console.log('[createForcePack] eA, eB:', eA, eB);
-
             var bA = eA.body;
             var bB = eB.body;
             var pA = bA.GetPosition();
@@ -275,7 +251,6 @@ Gry.Phx = (function() {
                 R2: dx*dx + dy*dy
             };
 
-            //console.log('[createForcePack] fp:', fp);
             return fp;
         };
 
@@ -293,8 +268,9 @@ Gry.Phx = (function() {
                     'orb':      function(fp) { return fp.eB.force.bind(fp.eB); }
                 },
                 'fighter': {
-                    'fighter':  function(fp) { return Gry.FighterMode[fp.eA.fighterMode].toFighter; },
-                    'hero':     function(fp) { return Gry.FighterMode[fp.eA.fighterMode].toHero; }
+                    'fighter':  function(fp) { return Gry.FighterMode[fp.eA.hero.fighterMode].toFighter; },
+                    'hero':     function(fp) { return Gry.FighterMode[fp.eA.hero.fighterMode].toHero; },
+                    'item':     function(fp) { return function(fp) { return { sym: 'a', size: -20/fp.R2 }; }; }
                 }
             };
 
@@ -388,10 +364,17 @@ Gry.Phx = (function() {
             //  Draw items
             for (i = 0; i < nItems; ++i) {
                 var item = items[i];
-                if (item === null) continue;
-                if (typeof item.draw === 'function') {
-                    item.updateMapPosDim();
-                    item.draw(canvasCtx);
+                if (item !== null) {
+                    if (!item.collected) {
+                        if (typeof item.draw === 'function') {
+                            item.updateMapPosDim();
+                            item.draw(canvasCtx);
+                        }
+                    }
+                    else {
+                        Gry.World.DestroyBody(item.body);
+                        items[i] = null;
+                    }
                 }
             }
 
@@ -468,17 +451,27 @@ Gry.Phx = (function() {
             var plrHero = heroes[plrHeroIdx];
             if (typeof plrHero !== 'undefined') {
                 var $heroHP = $('#heroHP');
+                var $heroXP = $('#heroXP');
+                var $heroGold = $('#heroGold');
                 if (plrHero !== null) {
                     $heroHP.text(Math.ceil(plrHero.HP)+'/'+plrHero.maxHP);
+                    $heroXP.text(plrHero.XP);
+                    $heroGold.text(plrHero.gold);
                 }
                 else {
                     $heroHP.text('R.I.P.');
+                    $heroXP.text('');
                 }
+                $('div.shortcutlist').removeClass('active');
+                var mp = Gry.actman.GetModeParam();
+                if (mp && mp.DOMElement) {
+                    mp.DOMElement.parent().addClass('active');
+                }
+                $('#'+plrHero.fighterMode).parent().addClass('active');
             }
         };
 
         var tick = function() {
-            //console.log('[tick]', heroes);
             applyForces();
             Gry.World.Step(1/FPS, 10, 10);
             if (!isDebugMode) {
@@ -490,7 +483,20 @@ Gry.Phx = (function() {
             updateView();
             updatePanels();
             Gry.World.ClearForces();
-            //console.log('[tick] END', heroes);
+        };
+
+        var isHeroAndTreasure = function(eA, eB) {
+            if (eA.entityType === Gry.EntityType.UNIT && eA.unitType === Gry.UnitType.HERO
+            &&  eB.entityType === Gry.EntityType.ITEM && eB.itemType === Gry.ItemType.TREASURE) {
+                return { hero: eA, treasure: eB };
+            }
+
+            if (eB.entityType === Gry.EntityType.UNIT && eB.unitType === Gry.UnitType.HERO
+            &&  eA.entityType === Gry.EntityType.ITEM && eA.itemType === Gry.ItemType.TREASURE) {
+                return { hero: eB, treasure: eA };
+            }
+
+            return null;    //  Not a hero-treasure pair
         };
 
         var listener = new b2ContactListener;
@@ -525,7 +531,15 @@ Gry.Phx = (function() {
             //  Walls don't count
             if (eA.entityType === Gry.EntityType.WALL || eB.entityType === Gry.EntityType.WALL) return;
 
-            //  Damage
+            //  Treasure?
+            var loot = isHeroAndTreasure(eA, eB);
+            if (loot) {
+                loot.hero.gold += loot.treasure.price;
+                loot.hero.XP += loot.treasure.XP;
+                loot.treasure.collected = true;
+            }
+
+            //  Damage?
             if (eA.team !== eB.team) {  //  No friendly fire
                 var hit = impulse.normalImpulses[0];
                 eA.HP -= hit;

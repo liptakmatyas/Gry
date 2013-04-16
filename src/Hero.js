@@ -28,9 +28,12 @@
                 mapDim: { w: size, h: size }
             });
 
+            this.XP = stat.XP;
             this.level = stat.level;
+            this.gold = stat.gold;
             this.orbs = [];
             this.symbol = stat.symbol;
+            this.fighterMode = stat.fighterMode;
 
             //  Override collision category
             var fixt = this.body.GetFixtureList();

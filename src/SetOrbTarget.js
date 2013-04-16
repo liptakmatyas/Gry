@@ -40,7 +40,7 @@
             //          same as `am_callback` passed in to `begin()`.
             //      -   'a2' is the current `GUIAction`
             return function(e) {
-                Gry.actman.SetMode({ name: 'SetOrbTarget', param: { type: this.orbType } }, this.chain);
+                Gry.actman.SetMode({ name: 'SetOrbTarget', param: { type: this.orbType, DOMElement: $('#'+this.orbType) } }, this.chain);
                 this.orb = null;
                 this.done_handler = this.done.bind(this);
                 Gry.gui.$canvas.on('click', this.done_handler);
